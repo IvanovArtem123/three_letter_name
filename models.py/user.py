@@ -1,9 +1,16 @@
 from sqlalchemy import (CheckConstraint, Column, Integer, String,
                         UniqueConstraint)
 import uuid
+from enum import IntEnum
 
 from .base import BaseModel
-from schemas.user import UserRole
+
+
+class UserRole(IntEnum):
+    """Роль пользователя."""
+
+    USER = 0
+    ADMIN = 1
 
 
 class User(BaseModel):
