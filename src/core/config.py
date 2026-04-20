@@ -15,6 +15,7 @@ load_dotenv(ENV_INFRA, override=False)
 @dataclass(frozen=True)
 class Settings:
     """Настройки проекта."""
+    app_title: str = 'SoulGoodman VPN API'
     database_url: str = 'sqlite+aiosqlite:///./fastapi.db'
 
 
