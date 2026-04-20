@@ -13,3 +13,4 @@ class Panel(BaseModel):
     login = Column(String(150), nullable=False)
     password_hash = Column(String(255), nullable=False)
     country = Column(String(150), nullable=False)
+    

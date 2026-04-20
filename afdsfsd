@@ -1,0 +1,10 @@
+*   [33ma70ce6e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/main[m[33m)[m Merge pull request #2 from IvanovArtem123/feature/schemas_panel
+[31m|[m[32m\[m  
+[31m|[m * [33mb394198[m[33m ([m[1;31morigin/feature/schemas_panel[m[33m, [m[1;32mmas[m[33m)[m Add CRUDbasee
+* [32m|[m [33m52d8d60[m Merge pull request #1 from IvanovArtem123/feature/schemas_panel
+[33m|[m[32m\[m[32m|[m 
+[33m|[m * [33mb1b2c82[m Add miogrations and db
+[33m|[m[33m/[m  
+* [33mf7dcf6d[m Remove constants
+* [33md3b9dbe[m Remove constants
+* [33mb88efaa[m Add models and base settings

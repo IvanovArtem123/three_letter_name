@@ -7,7 +7,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, StringConstraints, field_validator
 from pydantic.config import Extra
 
-from src.core.constants import (
+from core.constants import (
     MIN_LEN_PATH_SCHEME, MAX_LEN_PATH_SCHEME, MIN_LEN_DOMAIN_SCHEME,
     MAX_LEN_DOMAIN_SCHEME, MAX_LEN_COUNTRY_SCHEME
 )
