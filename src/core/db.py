@@ -24,7 +24,7 @@ class PreBase:
 Base = declarative_base(cls=PreBase)
 
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    settings.database_url,
     echo=False,
     pool_pre_ping=True,
 )
@@ -36,12 +36,10 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
-async def get_session() -> AsyncIterator[AsyncSession]:
+async def get_async_session() -> AsyncIterator[AsyncSession]:
     """Возвращает асинхронную сессию БД для зависимостей FastAPI."""
     async with AsyncSessionLocal() as session:
         try:
             yield session
         except (HTTPException, StarletteHTTPException):
             await session.rollback()
-
-__all__ = ['engine', 'AsyncSessionLocal', 'get_session']

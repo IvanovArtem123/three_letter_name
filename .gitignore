@@ -182,3 +182,16 @@ __pycache__/
 app.log
 app.log.*
 logs/
+
+
+# Файлы баз данных
+*.db
+*.sqlite
+*.sqlite3
+*.db3
+*.mdb
+*.accdb
+
+# Папки с БД (примеры)
+/database/
+*.db-journal

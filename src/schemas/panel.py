@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Annotated, List, Set
+from typing import Annotated, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, StringConstraints, field_validator
 from pydantic.config import Extra
 
-from src.core.constants import (
+from core.constants import (
     MIN_LEN_PATH_SCHEME, MAX_LEN_PATH_SCHEME, MIN_LEN_DOMAIN_SCHEME,
     MAX_LEN_DOMAIN_SCHEME, MAX_LEN_COUNTRY_SCHEME
 )
@@ -62,9 +62,16 @@ class PanelCreate(BaseModel):
 
 class PanelUpdate(PanelCreate):
     """Схема для обновления данных о панели."""
+    path: Optional[PathPanelStr] = None
+    domain: Optional[DomainPanelStr] = None
+    login: Optional[Annotated[str, StringConstraints(min_length=1, max_length=150)]] = None
+    password: Optional[Annotated[str, StringConstraints(min_length=1, max_length=255)]] = None
+    country: Optional[CountryPanelStr] = None
+
+    model_config = ConfigDict(extra=Extra.forbid)
 
 
 class PanelInfo(PanelShortInfo):
     """Полная информация о панели."""
     login: Annotated[str, StringConstraints(min_length=1, max_length=150)]
-    password: Annotated[str, StringConstraints(min_length=1, max_length=255)]
+    password_hash: Annotated[str, StringConstraints(min_length=1, max_length=255)]

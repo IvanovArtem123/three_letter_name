@@ -20,9 +20,6 @@ class Subscription(BaseModel):
 
     __tablename__ = 'subscriptions'
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'))
-    created_at = Column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc), nullable=False)
     end_date = Column(DateTime(timezone=True), nullable=False)
     panels = relationship(
         "Panel",
