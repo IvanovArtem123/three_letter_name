@@ -1,18 +1,57 @@
-import hashlib
-
+import bcrypt
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
-from passlib.context import CryptContext
 
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from core.config import settings
 
 
 async def hash_password(password: str) -> str:
-    """Вернуть хэш для заданного пароля SHA256."""
-    # SHA256 хеширование первым слоем (любая длина пароля → 64 символа)
-    hash_object = hashlib.sha256(password.encode('utf-8'))
-    # Затем bcrypt
-    return hash_object.hexdigest()
+    """Вернуть хэш для заданного пароля bcrypt."""
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
+
+
+async def verify_password(plain_password: str, password_hash: str) -> bool:
+    """Проверить соответствие пароля его хэшу."""
+    return bcrypt.checkpw(
+        plain_password.encode('utf-8'),
+        password_hash.encode('utf-8')
+    )
+
+
+def create_access_token(
+    subject: str,
+    expires_in_minutes: Optional[int] = None,
+) -> str:
+    """Создать JWT с sub=<subject> и TTL (мин)."""
+    ttl = (
+        expires_in_minutes
+        if expires_in_minutes is not None
+        else settings.TOKEN_IDLE_TTL_MIN
+    )
+    now = datetime.now(tz=timezone.utc)
+    payload: dict[str, Any] = {
+        'sub': subject,
+        'iat': int(now.timestamp()),
+        'exp': int((now + timedelta(minutes=ttl)).timestamp()),
+    }
+    return jwt.encode(payload, settings.SECRET, algorithm=settings.JWT_ALGO)
+
+
+class TokenError(JWTError):
+    """Общий класс ошибок токена для унификации обработки."""
+
+
+def decode_token(token: str) -> dict[str, Any]:
+    """Декодировать JWT и вернуть payload."""
+    try:
+        return jwt.decode(
+            token,
+            settings.SECRET,
+            algorithms=[settings.JWT_ALGO],
+        )
+    except JWTError as exc:
+        raise TokenError(str(exc)) from exc

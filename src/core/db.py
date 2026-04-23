@@ -41,5 +41,6 @@ async def get_async_session() -> AsyncIterator[AsyncSession]:
     async with AsyncSessionLocal() as session:
         try:
             yield session
-        except (HTTPException, StarletteHTTPException):
+        except (HTTPException, StarletteHTTPException) as e:
             await session.rollback()
+            raise e

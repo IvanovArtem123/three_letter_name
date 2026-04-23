@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import IntEnum
 from typing import Annotated, Optional
+from pydantic.config import Extra
 
 from pydantic import (
     BaseModel,
@@ -44,6 +45,8 @@ class UserCreate(BaseModel):
     phone: Optional[PhoneStr] = None
     tg_id: Optional[TgIdStr] = None
 
+    model_config = ConfigDict(extra=Extra.forbid)
+
     @field_validator('email', 'phone', 'tg_id', mode='before')
     @classmethod
     def _empty_to_none(cls, v: str | None) -> str | None:
@@ -66,27 +69,20 @@ class UserCreate(BaseModel):
 class UserShortInfo(BaseModel):
     """Сокращённая информация о пользователе."""
 
-    model_config = ConfigDict(from_attributes=True)
-
     id: int
     username: str
+    uuid: str
     email: Optional[EmailStr] = None
     phone: Optional[str] = None
     tg_id: Optional[str] = None
 
+    model_config = ConfigDict(from_attributes=True)
 
-class UserInfo(BaseModel):
+
+class UserInfo(UserShortInfo):
     """Полная информация о пользователе."""
 
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    username: str
-    email: Optional[EmailStr] = None
-    phone: Optional[str] = None
-    tg_id: Optional[str] = None
     role: UserRole
-    is_active: bool
     created_at: datetime
     updated_at: datetime
 

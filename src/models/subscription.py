@@ -18,8 +18,7 @@ class SubscriptionStatus(IntEnum):
 class Subscription(BaseModel):
     """Модель пользовательской подписки."""
 
-    __tablename__ = 'subscriptions'
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'))
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
     end_date = Column(DateTime(timezone=True), nullable=False)
     panels = relationship(
         "Panel",

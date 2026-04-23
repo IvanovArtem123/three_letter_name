@@ -17,6 +17,10 @@ class Settings:
     """Настройки проекта."""
     app_title: str = 'SoulGoodman VPN API'
     database_url: str = 'sqlite+aiosqlite:///./fastapi.db'
+    # JWT
+    SECRET: str = os.getenv('SECRET', 'CHANGE_ME_SUPER_SECRET_32CHARS_MIN')
+    JWT_ALGO: str = os.getenv('JWT_ALGO', 'HS256')
+    TOKEN_IDLE_TTL_MIN: int = int(os.getenv('TOKEN_IDLE_TTL_MIN', '30'))
 
 
 settings = Settings()

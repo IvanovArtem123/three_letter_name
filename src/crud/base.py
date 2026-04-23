@@ -45,6 +45,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         obj_in: UpdateSchemaType,
         session: AsyncSession,
     ) -> ModelType:
+        """Обновление объекта."""
         obj_data = jsonable_encoder(db_obj)
         update_data = obj_in.model_dump(exclude_unset=True)
         for field in obj_data:

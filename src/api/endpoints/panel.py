@@ -7,17 +7,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.db import get_async_session
 from schemas.panel import PanelCreate, PanelShortInfo
 from crud.panel import panel_crud
+from api.services import get_current_user
 
 
 router = APIRouter(prefix='/panels', tags=['Панели'])
 
 @router.post(
-    '/',
+    '/create',
     response_model=PanelShortInfo,
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_201_CREATED,
     summary='Новая панель',
+    dependencies=[Depends(get_current_user)],
 )
-async def create_action(
+async def add_panel(
     obj_in: PanelCreate,
     session: Annotated[AsyncSession, Depends(get_async_session)]
 ) -> PanelShortInfo:
@@ -26,11 +28,11 @@ async def create_action(
     return panel
 
 @router.delete(
-    '/{panel_id}',
+    '/delete/{panel_id}',
     status_code=status.HTTP_204_NO_CONTENT,
-    summary='Новая панель',
+    summary='Удаление панели',
 )
-async def delete_action(
+async def panel(
     panel_id: Annotated[int, Path(title='ID панели')],
     session: Annotated[AsyncSession, Depends(get_async_session)]
 ) -> None:

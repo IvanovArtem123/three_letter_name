@@ -8,8 +8,6 @@ from .many_to_many import subscription_panels
 class Panel(BaseModel):
     """Модель панели."""
 
-    __tablename__ = 'panels'
-
     path = Column(String(150), nullable=False)
     domain = Column(String(150), nullable=False)
     login = Column(String(150), nullable=False)
