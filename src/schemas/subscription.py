@@ -59,6 +59,7 @@ class SubscriptionGetShortInfo(BaseModel):
     id: int
     user_id: int
     keys: list[str]
+    code: str
     end_date: datetime
     status: int
 

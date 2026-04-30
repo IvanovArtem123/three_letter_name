@@ -31,11 +31,19 @@ async def create_subscription(
     new_sub = await sub_crud.create_subscription(
         session=session, obj_in=obj_in, panels=all_panels)
     client_obj = CreateClientInbound(user_id=obj_in.user_id, session=session)
-    await client_obj.add_user_in_inbound(
-        inbound_id=1,
-        panel=all_panels[0]
-    )
-    return new_sub
+    keys = await client_obj.add_user_in_inbound(
+            inbound_id=1,
+            panels=all_panels
+        )
+    return SubscriptionInfo(
+        id=new_sub.id,
+        user_id=new_sub.user_id,
+        keys=keys,
+        code=new_sub.code,
+        end_date=new_sub.end_date,
+        status=new_sub.status,
+        created_at=new_sub.created_at
+        )
 
 
 @router.get(
@@ -64,6 +72,7 @@ async def get_keys_by_sub_code(
         id=subscription.id,
         user_id=subscription.user_id,
         keys=keys,
+        code=subscription.code,
         end_date=subscription.end_date,
         status=subscription.status,
         created_at=subscription.created_at

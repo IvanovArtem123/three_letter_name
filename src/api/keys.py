@@ -92,7 +92,7 @@ class GetKeys():
 
 
 class CreateClientInbound():
-    """Класс создания клиента вinbound на панели управления."""
+    """Класс создания клиента в inbound на панели управления."""
     def __init__(
             self,
             user_id: int,
@@ -109,33 +109,39 @@ class CreateClientInbound():
             session=self.session
         )
         expiry_time = int(sub.end_date.timestamp())
-        data = {
-            'id': inbound_id,
-            'settings': {
-                    'clients': [
-                        {
-                            'id': user.uuid,
-                            'flow': '',
-                            'email': user.email,
-                            'limitIp': 0,
-                            'totalGB': 0,
-                            'expiryTime': expiry_time,
-                            'enable': True,
-                            'tgId': user.tg_id,
-                            'subId': sub.code,
-                            'comment': '',
-                            'reset': 0
-                        }
-                    ]
+        settings_data = {
+            'clients': [
+                {
+                    'id': user.uuid,
+                    'flow': '',
+                    'email': user.email,
+                    'limitIp': 0,
+                    'totalGB': 0,
+                    'expiryTime': expiry_time,
+                    'enable': True,
+                    'tgId': user.tg_id,
+                    'subId': sub.code,
+                    'comment': '',
+                    'reset': 0
                 }
-            }
-        panels = sub.panels
+            ]
+        }
+        responses = []
         for panel in panels:
             base_url_panel = f"https://{panel.domain}/{panel.path}"
-            url_request = base_url_panel + f"/panel/api/inbounds/AddClient"
-            cookie = await panel_crud.get_panel_cookie(
+            url_request = base_url_panel + f"/panel/api/inbounds/addClient"
+            cookie = await panel_crud.get_cookie_by_panel_id(
                 panel_id=panel.id,
                 session=self.session
             )
-            response = requests.post(url_request, json=data, cookies=cookie)
-            return response.json()
+            data = {
+                "id": 1,
+                "settings": json.dumps(settings_data)
+            }
+            response = requests.post(
+                url_request, 
+                data=data,
+                cookies=cookie
+            )
+            responses.append(response.text)
+        return responses
