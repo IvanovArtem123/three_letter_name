@@ -75,7 +75,7 @@ async def create_user(
                 example={
                     'username': 'TestName1',
                     'password': 'TestPassword1',
-                    'email': 'testmail@mail.com',
+                    'email': 'testmail@gmail.com',
                     'phone': '+79998887766',
                     'tg_id': '123456789'
                 }
