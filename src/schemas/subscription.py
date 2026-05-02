@@ -68,3 +68,8 @@ class SubscriptionGetShortInfo(BaseModel):
 
 class SubscriptionInfo(SubscriptionGetShortInfo):
     created_at: datetime
+
+
+class SubscriptionCode(BaseModel):
+    code: str
+    status_code: list[str]

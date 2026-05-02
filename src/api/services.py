@@ -1,4 +1,6 @@
 from typing import Annotated, Optional
+import json
+from datetime import datetime
 
 from fastapi import Depends, HTTPException, Request, Response, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -9,6 +11,7 @@ from sqlalchemy.orm import load_only
 from core.db import get_async_session
 from core.security import TokenError, decode_token
 from models.user import User
+from models.subscription import Subscription
 from schemas.user import UserInfo, UserRole
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -78,3 +81,43 @@ async def get_current_user(
             headers={'WWW-Authenticate': 'Bearer'},
         )
     return UserInfo.model_validate(user)
+
+
+async def get_list_inbound_id(data: str) -> list[int]:
+    '''Получаем id инбаундов панели.'''
+    data = json.loads(data)
+    obj = data['obj']
+    result = []
+    for inbound in obj:
+        inbound_id = inbound['id']
+        result.append(int(inbound_id))  # пока запихиваем все inboundы которые найдём в панели
+    return result
+
+
+async def data_user_config(inbound_id: int, user: User, sub: Subscription) -> dict:
+    '''Формируем data для запроса на добавления пользователя в inbound.'''
+    end_date = sub.end_date
+    expiry_time = int(end_date.timestamp() * 1000)
+    settings_data = {
+        'clients': [
+            {
+                'id': user.uuid,
+                'flow': 'xtls-rprx-vision',  # из-за этого может не работать
+                'email': '',
+                'limitIp': 0,
+                'totalGB': 0,
+                'expiryTime': expiry_time,
+                'enable': True,
+                'tgId': user.tg_id,
+                'subId': sub.code,
+                'comment': user.username,
+                'reset': 0
+            }
+        ]
+    }
+    data = {
+        'id': inbound_id,
+        'settings': json.dumps(settings_data)
+    }
+    return data
+

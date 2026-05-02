@@ -1,8 +1,8 @@
-"""First migration
+"""Postgres Migration
 
-Revision ID: 6ecac3c4fa32
+Revision ID: 3ba2dd8dc412
 Revises: 
-Create Date: 2026-04-22 00:29:41.735714
+Create Date: 2026-05-02 01:06:59.122105
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '6ecac3c4fa32'
+revision: str = '3ba2dd8dc412'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -25,8 +25,9 @@ def upgrade() -> None:
     sa.Column('path', sa.String(length=150), nullable=False),
     sa.Column('domain', sa.String(length=150), nullable=False),
     sa.Column('login', sa.String(length=150), nullable=False),
-    sa.Column('password_hash', sa.String(length=255), nullable=False),
+    sa.Column('password', sa.String(length=255), nullable=False),
     sa.Column('country', sa.String(length=150), nullable=False),
+    sa.Column('cookie', sa.JSON(), nullable=True),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
@@ -44,22 +45,33 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
+    sa.CheckConstraint("email IS NULL OR email ~ '^[a-zA-Z0-9][a-zA-Z0-9._%%+-]{0,63}@gmail\\.com$'", name='check_email_format'),
+    sa.CheckConstraint("phone IS NULL OR phone ~ '^\\+\\d{7,15}$'", name='check_phone_format'),
+    sa.CheckConstraint("username ~ '^[a-zA-Z0-9_]{3,20}$'", name='check_username_format'),
     sa.CheckConstraint('(email IS NOT NULL) OR (phone IS NOT NULL)', name='ck_users_contact_required'),
     sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('email'),
     sa.UniqueConstraint('email', name='uq_users_email'),
-    sa.UniqueConstraint('phone', name='uq_users_phone')
+    sa.UniqueConstraint('password_hash'),
+    sa.UniqueConstraint('phone'),
+    sa.UniqueConstraint('phone', name='uq_users_phone'),
+    sa.UniqueConstraint('tg_id'),
+    sa.UniqueConstraint('username'),
+    sa.UniqueConstraint('uuid')
     )
     op.create_index(op.f('ix_user_id'), 'user', ['id'], unique=False)
     op.create_table('subscription',
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('end_date', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('code', sa.String(length=16), nullable=False),
     sa.Column('status', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.CheckConstraint('end_date IS NULL OR "end_date" > created_at', name='check_end_valid'),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('code')
     )
     op.create_index(op.f('ix_subscription_id'), 'subscription', ['id'], unique=False)
     op.create_table('subscription_panels',

@@ -7,6 +7,8 @@ uvicorn[standard]>=0.27.0,<0.30.0
 # База данных
 SQLAlchemy>=2.0,<3.0
 alembic>=1.13.0,<2.0.0
+asyncpg
+psycopg2-binary
 # Или если обновить fastapi-users:
 # SQLAlchemy>=2.0.0,<2.1.0
 

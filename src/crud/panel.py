@@ -55,13 +55,19 @@ class CRUDPanel(CRUDBase[Panel, PanelCreate, PanelUpdate]):
         self,
         panel_id: int,
         session: AsyncSession
-    ) -> str | None:
-        """Получить cookie панели управления по ее id."""
+    ) -> dict | None:
+        """Получить cookie панели управления в виде словаря."""
         panel = await self.get(obj_id=panel_id, session=session)
-        if panel:
-            cookies_dict = json.loads(panel.cookie)
-            cookies_jar = requests.utils.cookiejar_from_dict(cookies_dict)
-            return cookies_jar
+        if not panel or not panel.cookie:
+            return None
+        if isinstance(panel.cookie, dict):
+            return panel.cookie
+        if isinstance(panel.cookie, str):
+            try:
+                return json.loads(panel.cookie)
+            except json.JSONDecodeError:
+                return None
         return None
+
 
 panel_crud = CRUDPanel(Panel)

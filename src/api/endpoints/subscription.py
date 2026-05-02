@@ -5,11 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db import get_async_session
 from api.services import get_current_user
-from schemas.subscription import SubscriptionInfo, SubscriptionCreate
+from schemas.subscription import (
+    SubscriptionCode,
+    SubscriptionInfo,
+    SubscriptionCreate)
 from crud.subscription import sub_crud
 from crud.panel import panel_crud
 from api.validators.user import get_user_or_404
-from api.keys import GetKeys, CreateClientInbound
+from api.keys import GetKeys, AddUserToInbpounds
 
 
 router = APIRouter(prefix='/sub', tags=['Подписки'])
@@ -17,32 +20,28 @@ router = APIRouter(prefix='/sub', tags=['Подписки'])
 
 @router.post(
     '/create',
-    response_model=SubscriptionInfo,
+    response_model=SubscriptionCode,
     status_code=status.HTTP_200_OK,
     summary='Создание подписки',
 )
 async def create_subscription(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     obj_in: SubscriptionCreate
-) -> SubscriptionInfo:
+) -> SubscriptionCode:
     """Создание подписки для пользователя."""
-    await get_user_or_404(session=session, user_id=obj_in.user_id)
-    all_panels = await panel_crud.get_all(session)
+    user = await get_user_or_404(session=session, user_id=obj_in.user_id)
+    all_panels = await panel_crud.get_all(session) #  пока все панели 
     new_sub = await sub_crud.create_subscription(
         session=session, obj_in=obj_in, panels=all_panels)
-    client_obj = CreateClientInbound(user_id=obj_in.user_id, session=session)
-    keys = await client_obj.add_user_in_inbound(
-            inbound_id=1,
-            panels=all_panels
-        )
-    return SubscriptionInfo(
-        id=new_sub.id,
-        user_id=new_sub.user_id,
-        keys=keys,
+    obj = AddUserToInbpounds(
+        session=session,
+        user=user,
+        sub=new_sub
+    )
+    status_code = await obj.add_user_to_inbounds()
+    return SubscriptionCode(
         code=new_sub.code,
-        end_date=new_sub.end_date,
-        status=new_sub.status,
-        created_at=new_sub.created_at
+        status_code=status_code
         )
 
 
@@ -77,7 +76,6 @@ async def get_keys_by_sub_code(
         status=subscription.status,
         created_at=subscription.created_at
         )
-    
 
 
 @router.delete(

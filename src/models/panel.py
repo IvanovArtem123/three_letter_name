@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String
+from sqlalchemy import Column, String, JSON
 from sqlalchemy.orm import relationship
 
 from .base import BaseModel
@@ -19,4 +19,4 @@ class Panel(BaseModel):
         back_populates="panels",
         lazy='selectin'
     )
-    cookie = Column(String(750), nullable=True)
+    cookie = Column(JSON, nullable=True)

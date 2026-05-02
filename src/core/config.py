@@ -16,7 +16,10 @@ load_dotenv(ENV_INFRA, override=False)
 class Settings:
     """Настройки проекта."""
     app_title: str = 'SoulGoodman VPN API'
-    database_url: str = 'sqlite+aiosqlite:///./fastapi.db'
+    database_url: str = os.getenv(
+        'DATABASE_URL',
+        'postgresql+asyncpg://postgres:mysecretpassword@localhost:5432/myapp'
+    )
     # JWT
     SECRET: str = os.getenv('SECRET', 'CHANGE_ME_SUPER_SECRET_32CHARS_MIN')
     JWT_ALGO: str = os.getenv('JWT_ALGO', 'HS256')
