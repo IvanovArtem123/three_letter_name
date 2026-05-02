@@ -8,7 +8,8 @@ from api.services import get_current_user
 from schemas.subscription import (
     SubscriptionCode,
     SubscriptionInfo,
-    SubscriptionCreate)
+    SubscriptionCreate,
+    SubscriptionShortInfo)
 from crud.subscription import sub_crud
 from crud.panel import panel_crud
 from api.validators.user import get_user_or_404
@@ -38,10 +39,9 @@ async def create_subscription(
         user=user,
         sub=new_sub
     )
-    status_code = await obj.add_user_to_inbounds()
+    await obj.add_user_to_inbounds()
     return SubscriptionCode(
-        code=new_sub.code,
-        status_code=status_code
+        code=new_sub.code
         )
 
 
@@ -57,25 +57,28 @@ async def get_keys_by_sub_code(
     session: AsyncSession = Depends(get_async_session)
 ) -> SubscriptionInfo:
     """Получение всех ключей пользователя по коду подписки."""
-    subscription = await sub_crud.get_subscription_by_sub_code(
+    sub = await sub_crud.get_subscription_by_sub_code(
         sub_code=sub_code,
         session=session
-    )
-    user_id = subscription.user_id
-    get_keys_object = GetKeys(
-        user_id=user_id,
-        session=session
-    )
-    keys = await get_keys_object.get_keys()
-    return SubscriptionInfo(
-        id=subscription.id,
-        user_id=subscription.user_id,
-        keys=keys,
-        code=subscription.code,
-        end_date=subscription.end_date,
-        status=subscription.status,
-        created_at=subscription.created_at
         )
+    user = await get_user_or_404(session=session, user_id=sub.user_id)
+    obj = AddUserToInbpounds(
+        session=session,
+        user=user,
+        sub=sub
+    )
+    keys = await obj.get_keys_to_subscriprion()
+    return SubscriptionInfo(
+        id=sub.id,
+        user_id=sub.user_id,
+        keys=keys,
+        code=sub_code,
+        created_at=sub.created_at,
+        end_date=sub.end_date,
+        status=sub.status
+    )
+
+
 
 
 @router.delete(

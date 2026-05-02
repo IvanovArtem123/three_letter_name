@@ -55,7 +55,7 @@ class SubscriptionUpdate(BaseModel):
     model_config = ConfigDict(extra=Extra.forbid)
 
 
-class SubscriptionGetShortInfo(BaseModel):
+class SubscriptionShortInfo(BaseModel):
     id: int
     user_id: int
     keys: list[str]
@@ -66,10 +66,9 @@ class SubscriptionGetShortInfo(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class SubscriptionInfo(SubscriptionGetShortInfo):
+class SubscriptionInfo(SubscriptionShortInfo):
     created_at: datetime
 
 
 class SubscriptionCode(BaseModel):
     code: str
-    status_code: list[str]

@@ -1,6 +1,6 @@
 from typing import Annotated, Optional
 import json
-from datetime import datetime
+import urllib.parse
 
 from fastapi import Depends, HTTPException, Request, Response, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -121,3 +121,33 @@ async def data_user_config(inbound_id: int, user: User, sub: Subscription) -> di
     }
     return data
 
+
+async def build_vless_link(response_text: str, uuid: str, panel_domain: str) -> str:
+    """Формирует правильную VLESS-ссылку"""
+    obj = json.loads(response_text)['obj']
+    settings = json.loads(obj['settings'])
+    stream = json.loads(obj['streamSettings'])
+    reality = stream['realitySettings']
+    xhttp = stream.get('xhttpSettings', {})
+    spx = reality.get('settings', {}).get('spiderX', '/')
+    encoded_spx = urllib.parse.quote(spx, safe='')
+    params = {
+        'type': stream.get('network', 'xhttp'),
+        'encryption': settings.get('encryption', 'none'),
+        'path': urllib.parse.quote(xhttp.get('path', '/'), safe=''),
+        'host': urllib.parse.quote(xhttp.get('host', ''), safe=''),
+        'mode': xhttp.get('mode', 'stream-one'),
+        'security': stream.get('security', 'reality'),
+        'pbk': reality.get('settings', {}).get('publicKey', ''),
+        'fp': reality.get('settings', {}).get('fingerprint', 'chrome'),
+        'sni': reality.get('serverNames', [''])[0],
+        'sid': reality.get('shortIds', [''])[0],
+        'spx': encoded_spx,
+    }
+    query = '&'.join(f"{k}={v}" for k, v in params.items() if v)
+    remark = obj.get('remark', '')
+    fragment = urllib.parse.quote(remark) if remark else ''
+    vless_url = f"{obj['protocol']}://{uuid}@{panel_domain}:{obj['port']}?{query}"
+    if fragment:
+        vless_url += f"#{fragment}"
+    return vless_url
