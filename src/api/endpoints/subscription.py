@@ -1,4 +1,4 @@
-from typing import Annotated, List
+from typing import Annotated, List, Dict
 
 from fastapi import APIRouter, Depends, Path, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,10 +17,10 @@ from models.user import User
 
 from api.exceptions import forbidden
 from api.validators.user import get_user_or_404
-from api.validators.panel import check_exits_panels
+from api.validators.panel import panels_list_or_404
+from api.validators.subscription import sub_or_404, chek_exist_sub_to_user
 from api.keys import AddUserToInbounds
 from api.validators.user import check_current_user_admin_or_SU
-from api.validators.panel import check_exits_panels
 from api.services import get_current_user
 
 router = APIRouter(prefix='/sub', tags=['Подписки'])
@@ -34,11 +34,12 @@ router = APIRouter(prefix='/sub', tags=['Подписки'])
 )
 async def create_subscription(
     session: Annotated[AsyncSession, Depends(get_async_session)],
+    user: Annotated[User, Depends(get_current_user)],
     obj_in: SubscriptionCreate
 ) -> SubscriptionCode:
     """Создание подписки для пользователя."""
-    user = await get_user_or_404(session=session, user_id=obj_in.user_id)
-    all_panels = await check_exits_panels(session=session) #  пока все панели
+    all_panels = await panels_list_or_404(session=session)  #  пока все панели
+    await chek_exist_sub_to_user(session=session, user_id=user.id)
     new_sub = await sub_crud.create_subscription(
         session=session, obj_in=obj_in, panels=all_panels)
     obj = AddUserToInbounds(
@@ -116,9 +117,15 @@ async def delete_subscription_by_sub_code(
     sub_code: Annotated[str, Path(description='Код подписки')],
     session: AsyncSession = Depends(get_async_session)
 ):
-    """Удаление подписки по коду."""
-    subscription = await sub_crud.get_subscription_by_sub_code(
+    '''Удаление подписки по коду.'''
+    sub = await sub_or_404(
         sub_code=sub_code,
         session=session
     )
-    await sub_crud.delete(session=session, db_obj=subscription)
+    user = await get_user_or_404(session=session, user_id=sub.user_id)
+    obj = AddUserToInbounds(
+        session=session,
+        user=user,
+        sub=sub)
+    await obj.delete_client()
+    await sub_crud.delete(session=session, db_obj=sub)

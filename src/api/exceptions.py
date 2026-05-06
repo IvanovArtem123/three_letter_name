@@ -32,3 +32,8 @@ def not_found(message: str) -> HTTPException:
 def unprocessable(message: str) -> HTTPException:
     """422 Unprocessable Entity."""
     return error(422, message)
+
+
+def conflict(message: str) -> HTTPException:
+    """409 Conflict."""
+    return error(409, message)

@@ -91,6 +91,14 @@ class AddUserToInbounds():
         url = base_url_panel + f'/panel/api/inbounds/get/{inbound_id}'
         response = await self.client.get(url=url, cookies=cookie)
         return response.text
+    
+    async def _del_client(
+            self, cookie: dict, inbound_id: int, uuid: str, base_url_panel: str
+    ) -> int:
+        url = (base_url_panel +
+               f'/panel/api/inbounds/{inbound_id}/delClient/{uuid}')
+        response = await self.client.post(url=url, cookies=cookie)
+        return response.status_code
 
     async def add_user_to_inbounds(self) -> list[str]:
         """Добавление пользователя во все inbound панели управления."""
@@ -136,3 +144,19 @@ class AddUserToInbounds():
                     )
                     keys.append(key)
         return keys
+
+    async def delete_client(self) -> None:
+        '''Удаление всех клиентов для полученных inbounds.'''
+        uuid = self.user.uuid
+        panels = self.sub.panels
+        for panel in panels:
+            base_url_panel = f"https://{panel.domain}/{panel.path}"
+            if not await self._check_auth_cookie(panel=panel):
+                cookie = await self._login_panel(
+                    panel=panel, base_url_panel=base_url_panel)
+                inbounds_id = await self._get_inbounds(
+                    cookie=cookie, base_url_panel=base_url_panel)
+                for inbound_id in inbounds_id:
+                    await self._del_client(
+                        cookie=cookie, inbound_id=inbound_id, uuid=uuid,
+                        base_url_panel=base_url_panel)

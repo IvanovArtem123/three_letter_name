@@ -7,7 +7,7 @@ from crud.panel import panel_crud
 from api.exceptions import not_found
 
 
-async def check_exits_panels(
+async def panels_list_or_404(
     session: AsyncSession
 ) -> List[Panel]:
     all_panels = await panel_crud.get_all(session)
