@@ -1,3 +1,4 @@
+import base64
 from typing import Dict, Any
 
 import httpx
@@ -8,8 +9,10 @@ from models.panel import Panel
 from models.user import User
 from models.subscription import Subscription
 from api.services import (
-    get_list_inbound_id, data_user_config, build_vless_link
+    get_list_inbound_id, data_user_config, build_vless_link,
+    get_inbound_transport
 )
+from core.constants import TOKEN_PANEL
 
 
 class AddUserToInbounds():
@@ -18,7 +21,7 @@ class AddUserToInbounds():
             self,
             user: User,
             sub: Subscription,
-            session: AsyncSession
+            session: AsyncSession,
             ):
         self.user = user
         self.sub = sub
@@ -27,10 +30,11 @@ class AddUserToInbounds():
             timeout=30.0,
             limits=httpx.Limits(max_keepalive_connections=20)
         )
+        self.headers = {'Authorization': f'Bearer {TOKEN_PANEL}'}
 
     async def _check_auth_cookie(
-            self, panel: Panel, base_url_panel: str
-            ) -> bool:
+         self, panel: Panel, base_url_panel: str
+    ) -> bool:
         """Проверка авторизационной cookie панели управления."""
         cookie = await panel_crud.get_cookie_by_panel_id(
             panel_id=panel.id,
@@ -55,6 +59,8 @@ class AddUserToInbounds():
         )
         if response.status_code == 200:
             cookies_dict = dict(response.cookies)
+        else:
+            raise Exception(f"Login failed with status {response.status_code}")
         new_panel = await panel_crud.update_panel_cookie(
             db_obj=panel,
             cookie=cookies_dict,
@@ -63,42 +69,46 @@ class AddUserToInbounds():
         return new_panel.cookie
 
     async def _get_inbounds(
-            self, cookie: dict, base_url_panel: str) -> list[int]:
+            self, base_url_panel: str) -> list[int]:
         """Получение списка inbound панели управления."""
         url = base_url_panel + "/panel/api/inbounds/list"
-        response = await self.client.get(url=url, cookies=cookie)
+        response = await self.client.get(url=url, headers=self.headers)
         data = response.text
         return await get_list_inbound_id(data)
 
     async def _add_client_to_inbound(
-            self, cookie: dict, base_url_panel: str, inbound_id: int 
+        self, base_url_panel: str, inbound_id: int
     ) -> int:
         '''Добавляем клиента в инбаунд. Возвращаем код ответа.'''
         url = base_url_panel + '/panel/api/inbounds/addClient'
         user = self.user
         sub = self.sub
+        inbound = await self._get_inbound(inbound_id=inbound_id,
+                                          base_url_panel=base_url_panel)
         data = await data_user_config(
             inbound_id=inbound_id,
             user=user,
-            sub=sub
+            sub=sub,
+            transport=await get_inbound_transport(inbound)
             )
-        response = await self.client.post(url=url, cookies=cookie, json=data)
+        response = await self.client.post(
+            url=url, headers=self.headers, json=data)
         return response.status_code
 
     async def _get_inbound(
-            self, cookie: dict, inbound_id: int, base_url_panel: str
+            self, inbound_id: int, base_url_panel: str
     ) -> str:
         '''Получение информации об Inbound.'''
         url = base_url_panel + f'/panel/api/inbounds/get/{inbound_id}'
-        response = await self.client.get(url=url, cookies=cookie)
+        response = await self.client.get(url=url, headers=self.headers)
         return response.text
 
     async def _del_client(
-            self, cookie: dict, inbound_id: int, uuid: str, base_url_panel: str
+            self, inbound_id: int, uuid: str, base_url_panel: str
     ) -> int:
         url = (base_url_panel +
                f'/panel/api/inbounds/{inbound_id}/delClient/{uuid}')
-        response = await self.client.post(url=url, cookies=cookie)
+        response = await self.client.post(url=url, headers=self.headers)
         return response.status_code
 
     async def add_user_to_inbounds(self) -> list[str]:
@@ -107,19 +117,15 @@ class AddUserToInbounds():
         result = []
         for panel in panels:
             base_url_panel = f"https://{panel.domain}{panel.port}/{panel.path}"
-            if not await self._check_auth_cookie(
-                panel=panel, base_url_panel=base_url_panel
-                ):
-                cookie = await self._login_panel(
-                    panel=panel, base_url_panel=base_url_panel)
-                inbounds_id = await self._get_inbounds(
-                    cookie=cookie, base_url_panel=base_url_panel)
-                for inbound_id in inbounds_id:
-                    status_code = await self._add_client_to_inbound(
-                        cookie=cookie, base_url_panel=base_url_panel,
-                        inbound_id=inbound_id
-                    )
-                    result.append(str(status_code))
+            inbounds_id = await self._get_inbounds(
+                base_url_panel=base_url_panel)
+            for inbound_id in inbounds_id:
+
+                status_code = await self._add_client_to_inbound(
+                    base_url_panel=base_url_panel,
+                    inbound_id=inbound_id
+                )
+                result.append(str(status_code))
         return result
 
     async def get_keys_to_subscriprion(self) -> list[str]:
@@ -129,25 +135,20 @@ class AddUserToInbounds():
         panels = self.sub.panels
         for panel in panels:
             base_url_panel = f"https://{panel.domain}{panel.port}/{panel.path}"
-            if not await self._check_auth_cookie(
-                panel=panel, base_url_panel=base_url_panel
-                ):
-                cookie = await self._login_panel(
-                    panel=panel, base_url_panel=base_url_panel)
-                inbounds_id = await self._get_inbounds(
-                    cookie=cookie, base_url_panel=base_url_panel)
-                for inbound_id in inbounds_id:
-                    panel_domain = panel.domain.split(':')[0]
-                    inbound_text = await self._get_inbound(
-                        cookie=cookie, base_url_panel=base_url_panel,
-                        inbound_id=inbound_id
-                    )
-                    key = await build_vless_link(
-                        response_text=inbound_text,
-                        uuid=uuid,
-                        panel_domain=panel_domain
-                    )
-                    keys.append(key)
+            inbounds_id = await self._get_inbounds(
+                base_url_panel=base_url_panel)
+            for inbound_id in inbounds_id:
+                panel_domain = panel.domain.split(':')[0]
+                inbound_text = await self._get_inbound(
+                    base_url_panel=base_url_panel,
+                    inbound_id=inbound_id
+                )
+                key = await build_vless_link(
+                    response_text=inbound_text,
+                    uuid=uuid,
+                    panel_domain=panel_domain
+                )
+                keys.append(key)
         return keys
 
     async def delete_client(self) -> None:
@@ -156,14 +157,34 @@ class AddUserToInbounds():
         panels = self.sub.panels
         for panel in panels:
             base_url_panel = f"https://{panel.domain}{panel.port}/{panel.path}"
-            if not await self._check_auth_cookie(
-                panel=panel, base_url_panel=base_url_panel
-                ):
-                cookie = await self._login_panel(
-                    panel=panel, base_url_panel=base_url_panel)
-                inbounds_id = await self._get_inbounds(
-                    cookie=cookie, base_url_panel=base_url_panel)
-                for inbound_id in inbounds_id:
-                    await self._del_client(
-                        cookie=cookie, inbound_id=inbound_id, uuid=uuid,
-                        base_url_panel=base_url_panel)
+            inbounds_id = await self._get_inbounds(
+                base_url_panel=base_url_panel)
+            for inbound_id in inbounds_id:
+                await self._del_client(
+                    inbound_id=inbound_id, uuid=uuid,
+                    base_url_panel=base_url_panel)
+
+    async def get_keys_by_subid(self) -> str:
+        '''Получение всех ключей для подписки.'''
+        panels = self.sub.panels
+        for panel in panels:
+            base_url_panel = f"https://{panel.domain}{panel.port}/{panel.path}"
+        url = (base_url_panel + '/panel/api/inbounds/' +
+               f'getSubLinks/{self.sub.code}')
+        response = await self.client.get(url=url, headers=self.headers)
+        keys = response.json().get('obj')
+        keys_str = '\n'.join(keys)
+        encoded = base64.b64encode(keys_str.encode('utf-8')).decode('utf-8')
+        return encoded
+
+    async def delete_client_by_subid(self) -> None:
+        '''Удаление всех клиентов для полученных inbounds.'''
+        panels = self.sub.panels
+        for panel in panels:
+            base_url_panel = f"https://{panel.domain}{panel.port}/{panel.path}"
+            inbounds_id = await self._get_inbounds(
+                base_url_panel=base_url_panel)
+        for inbound_id in inbounds_id:
+            url = (base_url_panel + '/panel/api/inbounds/' +
+                   f'{inbound_id}/delClient/{self.user.uuid}')
+            await self.client.post(url=url, headers=self.headers)

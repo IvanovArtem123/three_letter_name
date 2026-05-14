@@ -1,25 +1,42 @@
-# Основные зависимости
-fastapi>=0.100.0,<0.115.0
-pydantic>=2.0,<3.0
-pydantic[email]>=2.0,<3.0
-uvicorn[standard]>=0.27.0,<0.30.0
+# Core
+fastapi==0.114.2
+pydantic==2.13.3
+pydantic-settings>=2.0.0 
+uvicorn[standard]==0.29.0
 
-# База данных
-SQLAlchemy>=2.0,<3.0
-alembic>=1.13.0,<2.0.0
-asyncpg
-psycopg2-binary
-# Или если обновить fastapi-users:
-# SQLAlchemy>=2.0.0,<2.1.0
+# Database
+SQLAlchemy==2.0.49
+alembic==1.18.4
+asyncpg==0.31.0
+psycopg2-binary==2.9.12
+aiosqlite==0.22.1
 
-# Аутентификация
-passlib[bcrypt]>=1.7.4
-email-validator>=2.0.0
-python-jose[cryptography]>=3.3,<4.0
-python-multipart>=0.0.9,<1.0
-# Утилиты
-python-dotenv==1.2.1
+# Authentication
+python-jose[cryptography]==3.5.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.26
+email-validator==2.3.0
+Authlib==1.7.2
+
+# HTTP Client
+httpx==0.28.1
 requests==2.32.5
 requests-cache==1.3.1
-aiosqlite
-python-dateutil
+
+# Utils
+python-dotenv==1.2.1
+python-dateutil==2.9.0
+transliterate==1.10.2
+click==8.3.2
+
+# Development
+pytest==9.0.3
+pytest-asyncio==1.3.0
+flake8==7.3.0
+black>=24.0.0
+mypy>=1.0.0
+
+# Optional
+bcrypt==5.0.0
+cryptography==46.0.7
+Jinja2==3.1.6

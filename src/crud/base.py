@@ -1,4 +1,4 @@
-from typing import Generic, Optional, TypeVar, List
+from typing import Generic, Optional, TypeVar
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -23,13 +23,14 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         session: AsyncSession,
         **kwargs: Optional[dict],
     ) -> list[ModelType]:
-        """Получение всех объектов модели, которые соответствуют фильтру `**kwargs`."""
+        '''Получение всех объектов модели,
+        которые соответствуют фильтру `**kwargs`.'''
         query = select(self.model)
         for field, value in kwargs.items():
             if hasattr(self.model, field) and (value is not None):
                 query = query.where(getattr(self.model, field) == value)
         result = await session.execute(query)
-        return result.scalars().all()
+        return list(result.scalars().all())
 
     async def get(
         self,

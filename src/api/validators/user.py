@@ -2,26 +2,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.exceptions import bad_request, not_found, forbidden
 from sqlalchemy import select, or_
 
-from schemas.user import UserCreate
+from schemas.user import UserUpdate
 from models.user import User, UserRole
 from crud.user import user_crud
 
 
 async def check_unique_email_username_phone_tgid(
-        user_obj: UserCreate,
-        session: AsyncSession
+    user_obj: UserUpdate,
+    session: AsyncSession
 ) -> None:
-    """Проверка на уникальность полей модели пользователя:
-    email
-    username
-    phone"""
+    """Проверка на уникальность tg_id."""
     conditions = []
-    if user_obj.username:
-        conditions.append(User.username == user_obj.username)
-    if user_obj.email:
-        conditions.append(User.email == user_obj.email)
-    if user_obj.phone:
-        conditions.append(User.phone == user_obj.phone)
+    if user_obj.tg_id:
+        conditions.append(User.tg_id == user_obj.tg_id)
     if conditions:
         existing_users = await session.execute(
             select(User).where(or_(*conditions))
@@ -30,19 +23,14 @@ async def check_unique_email_username_phone_tgid(
         if existing_obj_users:
             message = 'Поля уже заняты: '
             for existing in existing_obj_users:
-                if (user_obj.username and
-                        existing.username == user_obj.username):
-                    message += 'username, '
-                if user_obj.email and existing.email == user_obj.email:
-                    message += 'email, '
-                if user_obj.phone and existing.phone == user_obj.phone:
-                    message += 'phone, '
+                if user_obj.tg_id and existing.tg_id == user_obj.tg_id:
+                    message += 'tg_id, '
             result = message[:-2] + '.'
             raise bad_request(result)
     return None
 
 
-async def check_current_user_admin_or_SU(
+async def check_current_user_admin(
     user: User
 ) -> bool:
     """Проверка является юзер админом или суперюзером."""
@@ -63,7 +51,7 @@ async def get_user_or_404(
 
 
 async def check_permission_values(
-    user_in: UserCreate, user: User
+    user_in: UserUpdate, user: User
 ) -> None:
     '''
     Проверяем может ли пользователь изменять поля:

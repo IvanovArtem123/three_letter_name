@@ -7,7 +7,7 @@ from .endpoints.auth import router as auth_router
 from .endpoints.subscription import router as subscription_router
 
 
-api_router = APIRouter()
+api_router = APIRouter(prefix='/api')
 
 api_router.include_router(panel_router)
 api_router.include_router(user_router)

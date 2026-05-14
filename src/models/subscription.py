@@ -1,7 +1,8 @@
 import uuid
 
 from enum import IntEnum
-from sqlalchemy import Column, DateTime, Integer, ForeignKey, CheckConstraint, String
+from sqlalchemy import (Column, DateTime, Integer, ForeignKey, CheckConstraint,
+                        String, Boolean)
 from sqlalchemy.orm import relationship
 
 from .base import BaseModel
@@ -15,14 +16,25 @@ class SubscriptionStatus(IntEnum):
     ACTIVE = 1
     FRIZED = 2
 
+    @classmethod
+    def get_all_status(cls) -> list[int]:
+        return [item.value for item in cls]
+
 
 class Subscription_Date_Levels(IntEnum):
     """Уровни даты подписки."""
 
     DAY = 1
-    MONTH = 2
-    HALF_YEAR = 3
-    YEAR = 4
+    WEEK = 2
+    MONTH = 3
+    THREE_MONTHS = 4
+    HALF_YEAR = 5
+    YEAR = 6
+    THREE_YEARS = 7
+
+    @classmethod
+    def get_all_levels(cls) -> list[int]:
+        return [item.value for item in cls]
 
 
 class Subscription(BaseModel):
@@ -47,6 +59,16 @@ class Subscription(BaseModel):
         nullable=False,
         default=SubscriptionStatus.ACTIVE.value,
     )
+    is_trial = Column(
+        Boolean,
+        nullable=False,
+        default=False
+    )
+    is_gift = Column(
+        Boolean,
+        nullable=False,
+        default=False
+    )
 
     __table_args__ = (
         CheckConstraint(
@@ -54,3 +76,6 @@ class Subscription(BaseModel):
             name='check_end_valid'
         ),
     )
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

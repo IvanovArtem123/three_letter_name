@@ -1,38 +1,29 @@
-import os
-from dotenv import load_dotenv
 import asyncio
+import sys
+from sqlalchemy import select
 from core.db import AsyncSessionLocal
-from models.user import User
-from core.security import hash_password
+from models.user import User, UserRole
 
 
-load_dotenv()
-
-
-def get_required_env(var_name: str):
-    """Получить переменную окружения или выдать ошибку"""
-    value = os.getenv(var_name)
-    if value:
-        return value
-    else:
-        print(f"❌ Ошибка: Переменная окружения {var_name} не установлена!")
-
-
-async def create_superuser():
-    admin_email = get_required_env("ADMIN_EMAIL")
-    admin_username = get_required_env("ADMIN_USERNAME")
-    admin_password = get_required_env("ADMIN_PASSWORD")
-
+async def create_admin(email: str):
     async with AsyncSessionLocal() as session:
-        user = User(
-            email=admin_email,
-            username=admin_username,
-            password_hash=await hash_password(admin_password),
-            role=2
-        )
-        session.add(user)
+        stmt = select(User).where(User.email == email).limit(1)
+        user = await session.scalar(stmt)
+        if user is None:
+            print(f"❌ Пользователь с email {email!r} не найден")
+            print("Сначала залогинься через Google.")
+            return
+        if user.role == int(UserRole.ADMIN):
+            print(f"✅ {email} уже админ")
+            return
+        user.role = int(UserRole.ADMIN)
         await session.commit()
-        print("✅ Админ создан!")
+        print(f"✅ {email} теперь админ")
+
 
 if __name__ == "__main__":
-    asyncio.run(create_superuser())
+    if len(sys.argv) != 2:
+        print("Использование: python -m scripts.create_admin your@email.com")
+        sys.exit(1)
+
+    asyncio.run(create_admin(sys.argv[1]))

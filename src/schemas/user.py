@@ -1,20 +1,17 @@
 from datetime import datetime
-from enum import IntEnum
 from typing import Annotated, Optional
-from pydantic.config import Extra
-import re
 
 from pydantic import (
     BaseModel,
     ConfigDict,
     EmailStr,
-    Field,
     StringConstraints,
     field_validator,
     field_serializer,
 )
 
-from core.constants import EMAIL_MAX, PHONE_MAX, TG_ID_MAX, USERNAME_MAX
+from models.user import UserRole
+from core.constants import PHONE_MAX, TG_ID_MAX, USERNAME_MAX
 
 UsernameStr = Annotated[
     str,
@@ -30,44 +27,6 @@ TgIdStr = Annotated[
 ]
 
 
-class UserRole(IntEnum):
-    """Роль пользователя."""
-
-    USER = 0
-    MANAGER = 1
-    ADMIN = 2
-
-
-class UserCreate(BaseModel):
-    """Модель для регистрации нового пользователя."""
-
-    username: UsernameStr
-    password: str
-    email: Optional[EmailStr] = Field(default=None, max_length=EMAIL_MAX)
-    phone: Optional[PhoneStr] = None
-    tg_id: Optional[TgIdStr] = None
-
-    model_config = ConfigDict(extra=Extra.forbid)
-
-    @field_validator('email', 'phone', 'tg_id', mode='before')
-    @classmethod
-    def _empty_to_none(cls, v: str | None) -> str | None:
-        if v is None:
-            return None
-        v = v.strip()
-        return v or None
-
-    @field_validator('password')
-    @classmethod
-    def _password_create_not_blank(cls, v: str) -> str:
-        v = (v or '').strip()
-        if not v:
-            raise ValueError('Пароль не может быть пустым')
-        if len(v) < 6:
-            raise ValueError('Минимальная длина пароля — 6 символов')
-        return v
-
-
 class UserShortInfo(BaseModel):
     """Сокращённая информация о пользователе."""
 
@@ -75,7 +34,6 @@ class UserShortInfo(BaseModel):
     username: str
     uuid: str
     email: Optional[EmailStr] = None
-    phone: Optional[str] = None
     tg_id: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
@@ -95,30 +53,13 @@ class UserInfo(UserShortInfo):
 
 class UserUpdate(BaseModel):
     """Модель для частичного обновления пользователя."""
-
-    username: Optional[UsernameStr] = None
-    email: Optional[EmailStr] = Field(default=None, max_length=EMAIL_MAX)
-    phone: Optional[PhoneStr] = None
-    tg_id: Optional[TgIdStr] = None
+    tg_id: str
     role: Optional[UserRole] = None
-    password: Optional[str] = None
 
-    @field_validator('email', 'phone', 'tg_id', mode='before')
+    @field_validator('tg_id')
     @classmethod
     def _empty_to_none(cls, v: str | None) -> str | None:
         if v is None:
             return None
         v = v.strip()
         return v or None
-
-    @field_validator('email')
-    @classmethod
-    def _check_format_email(cls, v: str | None) -> str | None:
-        if v is None:
-            return v
-        pattern = r'^[a-zA-Z0-9][a-zA-Z0-9._%+-]{0,63}@gmail\.com$'
-        if not re.match(pattern, v):
-            raise ValueError(
-                'Некорректный формат email. Принимается только @gmail.com'
-                )
-        return v

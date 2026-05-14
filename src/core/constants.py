@@ -20,8 +20,13 @@ PASS_HASH_MAX = 255
 CHECK_MAIL_FORMAT = (r"email IS NULL OR email ~ '^[a-zA-Z0-9]"
                      r"[a-zA-Z0-9._%+-]{0,63}@gmail\.com$'")
 
+TOKEN_PANEL = os.getenv('TOKEN_PANEL')
+
 EXAMPLE_PATH_PANEL = os.getenv('EXAMPLE_PATH_PANEL')
 EXAMPLE_DOMAIN_PANEL = os.getenv('EXAMPLE_DOMAIN_PANEL')
 EXAMPLE_PORT_PANEL = os.getenv('EXAMPLE_PORT_PANEL')
-EXAMPLE_LOGIN_PANEL = os.getenv('EXAMPLE_LOGIN_PANEL')
-EXAMPLE_PASSWORD_PANEL = os.getenv('EXAMPLE_PASSWORD_PANEL')
+SERVER_METADATA_URL = ('https://accounts.google.com/'
+                       '.well-known/openid-configuration')
+
+FAKE_KEY = ('dmxlc3M6Ly8wMDAwLTAwMDAtMDAwMC0wMD'
+            'AwLTAwMDBAemFiemF6YWJ6YS5jb206Nzc3Nzc3Nw==')

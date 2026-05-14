@@ -1,5 +1,4 @@
 from datetime import datetime
-from requests import session
 from sqlalchemy import select
 
 from schemas.subscription import SubscriptionCreate, SubscriptionUpdate
@@ -29,7 +28,9 @@ class CRUDSub(CRUDBase[Subscription, SubscriptionCreate, SubscriptionUpdate]):
             user_id=obj_in.user_id,
             end_date=end_date,
             status=obj_in.status,
-            panels=panels
+            panels=panels,
+            is_trial=obj_in.is_trial,
+            is_gift=obj_in.is_gift
         )
         session.add(subscription)
         await session.commit()

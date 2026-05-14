@@ -10,33 +10,6 @@ from models.panel import Panel
 class CRUDPanel(CRUDBase[Panel, PanelCreate, PanelUpdate]):
     """CRUD для панели управления."""
 
-    async def create_be_hash_pass(
-        self,
-        obj_in: PanelCreate,
-        session: AsyncSession
-    ):
-        """Создание панели управления с хешированием пароля."""
-        obj_panel = Panel(
-            path = obj_in.path,
-            domain = obj_in.domain,
-            login = obj_in.login,
-            password_hash = obj_in.password,
-            country = obj_in.country
-        )
-        session.add(obj_panel)
-        await session.commit()
-        await session.refresh(obj_panel)
-        return obj_panel
-
-    async def get_panel_by_id(
-        self,
-        panel_id: int,
-        session: AsyncSession
-    ) -> Panel | None:
-        """Получить панель управления по ее id."""
-        panel = await self.get(obj_id=panel_id, session=session)
-        return panel
-
     async def update_panel_cookie(
         self,
         db_obj: Panel,
