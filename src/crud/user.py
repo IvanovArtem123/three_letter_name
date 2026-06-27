@@ -4,11 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .base import CRUDBase
 from models.user import User
-from schemas.user import UserUpdate
+from schemas.user import UserUpdate, TelegramLoginSchema
 from core.security import hash_password
 
 
-class CRUDUser(CRUDBase[User, UserUpdate, UserUpdate]):
+class CRUDUser(CRUDBase[User, TelegramLoginSchema, UserUpdate]):
 
     async def update_user_with_hash_password(
             self,
@@ -36,6 +36,17 @@ class CRUDUser(CRUDBase[User, UserUpdate, UserUpdate]):
         """Получить uuid пользователя по его id."""
         result = await session.execute(
             select(User.uuid).where(User.id == user_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def get_by_tg_id(
+        self,
+        session: AsyncSession,
+        tg_id: str
+    ) -> User | None:
+        """Получить пользователя по его Telegram id."""
+        result = await session.execute(
+            select(User).where(User.tg_id == tg_id)
         )
         return result.scalar_one_or_none()
 

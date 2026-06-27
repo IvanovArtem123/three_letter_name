@@ -1,4 +1,6 @@
-from datetime import datetime
+from typing import Sequence
+
+from datetime import datetime, timezone
 from sqlalchemy import select
 
 from schemas.subscription import SubscriptionCreate, SubscriptionUpdate
@@ -21,7 +23,7 @@ class CRUDSub(CRUDBase[Subscription, SubscriptionCreate, SubscriptionUpdate]):
     ):
         """Создание подписки."""
         end_date = setup_end_date_subscription(
-            start_date=datetime.now(),
+            start_date=datetime.now(timezone.utc),
             level=obj_in.end_date_level
         )
         subscription = Subscription(
@@ -37,17 +39,17 @@ class CRUDSub(CRUDBase[Subscription, SubscriptionCreate, SubscriptionUpdate]):
         await session.refresh(subscription)
         return subscription
 
-    async def get_sub_by_user_id(
+    async def get_subs_by_user_id(
         self,
         user_id: int,
         session: AsyncSession
-    ) -> Subscription:
-        """Получить подписку пользователя по его id."""
+    ) -> Sequence[Subscription]:
+        """Получить все подписки пользователя по его id."""
         result = await session.execute(
             select(Subscription).where(Subscription.user_id == user_id)
         )
-        subscription = result.scalars().first()
-        return subscription
+        subscriptions = result.scalars().all()
+        return subscriptions
 
     async def get_subscription_by_sub_code(
         self,

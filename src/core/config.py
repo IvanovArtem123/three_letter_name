@@ -21,6 +21,9 @@ class Settings:
         'postgresql+asyncpg://postgres:mysecretpassword@localhost:5432/myapp'
     )
     SECRET: str = os.getenv('SECRET', 'CHANGE_ME_SUPER_SECRET_32CHARS_MIN')
+    BASE_URL: str = os.getenv('BASE_URL', 'http://localhost:8000')
+    TG_BOT_SECRET: str = os.getenv('TG_BOT_SECRET',
+                                   'CHANGE_ME_SUPER_SECRET_32CHARS_MIN')
 
 
 settings = Settings()

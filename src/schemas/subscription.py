@@ -12,6 +12,7 @@ from core.constants import (
     MAX_DOMAIN_SCHEME, MAX_COUNTRY_SCHEME
 )
 from models.subscription import Subscription_Date_Levels, SubscriptionStatus
+from core.config import settings
 
 
 PathPanelStr = Annotated[
@@ -44,6 +45,7 @@ CountryPanelStr = Annotated[
 class SubscriptionUpdate(BaseModel):
     end_date_level: Optional[int] = None
     status: Optional[int] = 1
+    is_active: Optional[bool] = None
 
     model_config = ConfigDict(extra=Extra.forbid)
 
@@ -86,19 +88,23 @@ class SubscriptionCreate(SubscriptionUpdate):
 class SubscriptionShortInfo(BaseModel):
     id: int
     user_id: int
-    code: str
+    sub_link: Optional[str] = None
     end_date: datetime
     status: int
     is_trial: bool
     is_gift: bool
+    is_active: bool
+    code: str
 
     model_config = ConfigDict(from_attributes=True)
+
+    @model_validator(mode='after')
+    def set_sub_link(self):
+        if not self.sub_link and self.code:
+            self.sub_link = f"{settings.BASE_URL}/api/sub/{self.code}"
+        return self
 
 
 class SubscriptionInfo(SubscriptionShortInfo):
     created_at: datetime
     keys: list[str]
-
-
-class SubscriptionCode(BaseModel):
-    code: str

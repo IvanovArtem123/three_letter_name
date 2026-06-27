@@ -30,3 +30,7 @@ SERVER_METADATA_URL = ('https://accounts.google.com/'
 
 FAKE_KEY = ('dmxlc3M6Ly8wMDAwLTAwMDAtMDAwMC0wMD'
             'AwLTAwMDBAemFiemF6YWJ6YS5jb206Nzc3Nzc3Nw==')
+
+
+ANNOUNCE_HAPP = ('Если VPN не работает, скорее всего поможет кнопка - обновить'
+                 ' подписку 🔄')
