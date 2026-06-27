@@ -1,16 +1,17 @@
 from typing import Annotated, List
 
 from fastapi.params import Body
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db import get_async_session
-from schemas.user import UserShortInfo, UserUpdate, UserInfo
+from schemas.user import (UserShortInfo, UserUpdate, UserInfo,
+                          TelegramLoginSchema)
 from crud.user import user_crud
 from api.services import get_current_user
 from api.validators.user import (
     check_unique_email_username_phone_tgid, check_current_user_admin,
-    get_user_or_404, check_permission_values
+    get_user_or_404, check_permission_values, get_user_by_tg_id_or_404
     )
 from api.exceptions import bad_request, forbidden
 from models.user import User
@@ -77,13 +78,13 @@ async def update_user(
             'user1_update': {
                 'summary': 'Пример обновления пользователя для user1',
                 'value': {
-                    'tg_id': '123456785'
+                    'tg_id': 123456785
                 }
             }
         }),
 ) -> UserShortInfo:
     """Обновить информацию о пользователе."""
-    if ((not await check_current_user_admin(user)) or
+    if ((not await check_current_user_admin(user)) and
             (not (user.id == user_id))):
         return bad_request(
             'Недостаточно прав для обновления информации о пользователе.'
@@ -93,10 +94,6 @@ async def update_user(
         user=db_user,
         user_in=user_in)
     if db_user:
-        await check_unique_email_username_phone_tgid(
-            session=session,
-            user_obj=user_in
-        )
         return await user_crud.update_user_with_hash_password(
             db_obj=db_user,
             obj_in=user_in,
@@ -121,3 +118,30 @@ async def delete_user(
     user = await get_user_or_404(user_id, session)
     if user:
         await user_crud.delete(db_obj=user, session=session)
+
+
+@router.post('/login_tg', summary="Вход через Telegram")
+async def login_tg(
+    login_data: TelegramLoginSchema,
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+) -> UserShortInfo:
+    '''Создание пользователя только с помощью Telegram id.'''
+    await check_unique_email_username_phone_tgid(
+        session=session,
+        user_obj=User(tg_id=login_data.tg_id)
+    )
+    user = await user_crud.create(
+        session=session,
+        obj_in=login_data
+    )
+    return user
+
+
+@router.get("/get_by_tg_id/{tg_id}",
+            summary="Получить информацию о пользователе по Telegram id")
+async def get_by_tg_id(
+    tg_id: int,
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+) -> UserShortInfo:
+    '''Получить информацию о пользователе по его Telegram id.'''
+    return await get_user_by_tg_id_or_404(tg_id=tg_id, session=session)

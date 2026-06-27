@@ -21,10 +21,6 @@ PhoneStr = Annotated[
     str,
     StringConstraints(strip_whitespace=True, max_length=PHONE_MAX),
 ]
-TgIdStr = Annotated[
-    str,
-    StringConstraints(strip_whitespace=True, max_length=TG_ID_MAX),
-]
 
 
 class UserShortInfo(BaseModel):
@@ -33,10 +29,18 @@ class UserShortInfo(BaseModel):
     id: int
     username: str
     uuid: str
-    email: Optional[EmailStr] = None
-    tg_id: Optional[str] = None
+    email: str
+    tg_id: Optional[int] = None
+    new: bool
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class TelegramLoginSchema(BaseModel):
+    """Модель для создания пользователя."""
+    username: UsernameStr
+    tg_id: int
+    email: str
 
 
 class UserInfo(UserShortInfo):
@@ -53,13 +57,6 @@ class UserInfo(UserShortInfo):
 
 class UserUpdate(BaseModel):
     """Модель для частичного обновления пользователя."""
-    tg_id: str
+    new: Optional[bool] = None
+    tg_id: Optional[int] = None
     role: Optional[UserRole] = None
-
-    @field_validator('tg_id')
-    @classmethod
-    def _empty_to_none(cls, v: str | None) -> str | None:
-        if v is None:
-            return None
-        v = v.strip()
-        return v or None

@@ -4,7 +4,8 @@ from datetime import datetime
 from typing import Annotated, Optional
 
 from pydantic import (
-    BaseModel, ConfigDict, StringConstraints, field_validator, model_validator)
+    BaseModel, ConfigDict, StringConstraints, field_validator, model_validator,
+    Field)
 from pydantic.config import Extra
 
 from core.constants import (
@@ -12,6 +13,7 @@ from core.constants import (
     MAX_DOMAIN_SCHEME, MAX_COUNTRY_SCHEME
 )
 from models.subscription import Subscription_Date_Levels, SubscriptionStatus
+from core.config import settings
 
 
 PathPanelStr = Annotated[
@@ -86,19 +88,22 @@ class SubscriptionCreate(SubscriptionUpdate):
 class SubscriptionShortInfo(BaseModel):
     id: int
     user_id: int
-    code: str
+    sub_link: Optional[str] = None
     end_date: datetime
     status: int
     is_trial: bool
     is_gift: bool
+    code: str
 
     model_config = ConfigDict(from_attributes=True)
+
+    @model_validator(mode='after')
+    def set_sub_link(self):
+        if not self.sub_link and self.code:
+            self.sub_link = f"{settings.BASE_URL}/api/sub/{self.code}"
+        return self
 
 
 class SubscriptionInfo(SubscriptionShortInfo):
     created_at: datetime
     keys: list[str]
-
-
-class SubscriptionCode(BaseModel):
-    code: str

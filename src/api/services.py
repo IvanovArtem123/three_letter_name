@@ -10,6 +10,7 @@ from core.db import get_async_session
 from models.user import User
 from schemas.user import UserInfo
 from models.subscription import Subscription
+from core.config import settings
 
 USER_FIELDS_TO_LOAD = [
     User.id,
@@ -17,6 +18,7 @@ USER_FIELDS_TO_LOAD = [
     User.uuid,
     User.email,
     User.tg_id,
+    User.new,
     User.role,
     User.created_at,
     User.updated_at,
@@ -28,6 +30,21 @@ async def get_current_user(
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> UserInfo:
     """Возвращает текущего пользователя по сессии."""
+    bot_secret = request.headers.get("X-Bot-Secret")
+    if bot_secret is not None:
+        if bot_secret != settings.TG_BOT_SECRET:
+            raise HTTPException(status_code=403, detail="Forbidden")
+        tg_id = request.headers.get("X-TG-ID")
+        if tg_id is None:
+            raise HTTPException(status_code=400,
+                                detail="X-TG-ID header required")
+        query = select(User).where(
+            User.tg_id == int(tg_id)).options(load_only(*USER_FIELDS_TO_LOAD))
+        result = await session.execute(query)
+        user = result.scalars().first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return UserInfo.model_validate(user)
     user_id = request.session.get("user_id")
 
     if user_id is None:
@@ -112,8 +129,8 @@ async def data_user_config(
 async def build_vless_link(
         response_text: str, uuid: str, panel_domain: str) -> str:
     obj = json.loads(response_text)['obj']
-    settings = json.loads(obj['settings'])
-    stream = json.loads(obj['streamSettings'])
+    settings = obj['settings']
+    stream = obj['streamSettings']
     network = stream.get('network', 'xhttp')
     security = stream.get('security', 'reality')
     transport_key = f"{network}Settings"
@@ -182,5 +199,5 @@ async def get_inbound_transport(
 ) -> str:
     '''Получаем транспорт инбаунда.'''
     obj_response = json.loads(response_text)
-    obj = json.loads(obj_response['obj']['streamSettings'])
+    obj = obj_response['obj']['streamSettings']
     return obj['network']
