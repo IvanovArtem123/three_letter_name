@@ -69,11 +69,6 @@ class Subscription(BaseModel):
         nullable=False,
         default=False
     )
-    is_active = Column(
-        Boolean,
-        nullable=False,
-        default=True
-    )
 
     __table_args__ = (
         CheckConstraint(
