@@ -20,7 +20,8 @@ class ErrorHandlingMiddleware(BaseMiddleware):
             logger.error(f"Ошибка в хендлере: {e}", exc_info=True)
             try:
                 if hasattr(event, 'message') and event.message:
-                    await event.message.answer("⚠️ Произошла ошибка. Попробуйте позже.")
+                    await event.message.answer("⚠️ Произошла ошибка."
+                                               " Попробуйте позже.")
                 elif hasattr(event, 'callback_query') and event.callback_query:
                     await event.callback_query.answer("⚠️ Произошла ошибка",
                                                       show_alert=True)

@@ -1,5 +1,5 @@
+from string import ascii_uppercase, digits
 import json
-import urllib
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, Request, status
@@ -11,6 +11,9 @@ from models.user import User
 from schemas.user import UserInfo
 from models.subscription import Subscription
 from core.config import settings
+from crud.promocode import promocode_crud
+from string import ascii_uppercase, digits
+from random import choices
 
 USER_FIELDS_TO_LOAD = [
     User.id,
@@ -126,74 +129,6 @@ async def data_user_config(
     return data
 
 
-async def build_vless_link(
-        response_text: str, uuid: str, panel_domain: str) -> str:
-    obj = json.loads(response_text)['obj']
-    settings = obj['settings']
-    stream = obj['streamSettings']
-    network = stream.get('network', 'xhttp')
-    security = stream.get('security', 'reality')
-    transport_key = f"{network}Settings"
-    transport = stream.get(transport_key, {})
-    params = {}
-    params['type'] = network
-    params['encryption'] = settings.get('encryption', 'none')
-    transport_map = {
-        'path': transport.get('path'),
-        'host': transport.get('host'),
-        'mode': transport.get('mode'),
-        'serviceName': transport.get('serviceName'),
-        'authority': transport.get('authority'),
-        'headerType': transport.get('header', {}).get('type'),
-    }
-    for k, v in transport_map.items():
-        if v:
-            params[k] = urllib.parse.quote(str(v), safe='')
-    padding = transport.get(
-        'xPaddingBytes'
-        ) or transport.get(
-            'x_padding_bytes')
-    if padding:
-        params['x_padding_bytes'] = str(padding)
-        extra_dict = {"xPaddingBytes": str(padding)}
-        sc_max = transport.get('scMaxEachPostBytes')
-        if sc_max:
-            extra_dict['scMaxEachPostBytes'] = str(sc_max)
-        params['extra'] = urllib.parse.quote(
-            json.dumps(extra_dict, separators=(',', ':')),
-            safe=''
-        )
-    flow = settings.get('flow', '')
-    if flow:
-        params['flow'] = flow
-    params['security'] = security
-    if security == 'reality':
-        reality = stream.get('realitySettings', {})
-        reality_settings = reality.get('settings', {})
-        spx = reality_settings.get('spiderX', '/')
-        params['pbk'] = reality_settings.get('publicKey', '')
-        params['fp'] = reality_settings.get('fingerprint', 'chrome')
-        params['sni'] = (reality.get('serverNames') or [''])[0]
-        params['sid'] = (reality.get('shortIds') or [''])[0]
-        params['spx'] = urllib.parse.quote(spx, safe='')
-    elif security == 'tls':
-        tls = stream.get('tlsSettings', {})
-        if tls.get('serverName'):
-            params['sni'] = tls['serverName']
-        if tls.get('fingerprint'):
-            params['fp'] = tls['fingerprint']
-        if tls.get('alpn'):
-            params['alpn'] = urllib.parse.quote(','.join(tls['alpn']), safe='')
-    query = '&'.join(f"{k}={v}" for k, v in params.items() if v)
-    remark = obj.get('remark', '')
-    fragment = urllib.parse.quote(remark) if remark else ''
-    vless_url = (f'{obj['protocol']}://{uuid}@' +
-                 f'{panel_domain}:{obj['port']}?{query}')
-    if fragment:
-        vless_url += f"#{fragment}"
-    return vless_url
-
-
 async def get_inbound_transport(
         response_text: str
 ) -> str:
@@ -201,3 +136,24 @@ async def get_inbound_transport(
     obj_response = json.loads(response_text)
     obj = obj_response['obj']['streamSettings']
     return obj['network']
+
+
+async def making_promocode(code_len: int = 10) -> str:
+    """Генерация случайного промокода."""
+    import random
+    import string
+
+    characters = string.ascii_uppercase + string.digits
+    promocode = ''.join(random.choice(characters) for _ in range(code_len))
+    return promocode.upper()
+
+
+async def generate_unique_code(session: AsyncSession, length: int = 10) -> str:
+    """
+    Генерирует уникальный код.
+    """
+    while True:
+        code = ''.join(choices(ascii_uppercase + digits, k=length))
+        existing = await promocode_crud.get_code(session=session, code=code)
+        if existing is None:
+            return code

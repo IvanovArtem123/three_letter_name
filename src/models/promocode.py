@@ -1,5 +1,7 @@
+from typing import List
 from enum import IntEnum
-from sqlalchemy import Column, ForeignKey, String, Boolean, Integer, DateTime
+from sqlalchemy import (Column, ForeignKey, String, Boolean, Integer, DateTime,
+                        ARRAY)
 from sqlalchemy.orm import relationship, validates
 
 from .base import BaseModel
@@ -21,15 +23,25 @@ class PromocodePurpose(IntEnum):
 class Promocode(BaseModel):
     code = Column(String(MAX_LEN_PROMOCODE), nullable=False, unique=True,
                   index=True)
-    is_active = Column(Boolean, nullable=False, default=False, index=True) # активен / неактивен
-    is_disposable = Column(Boolean, nullable=False, default=False)  # одноразовый / многоразовый
+    is_active = Column(Boolean, nullable=False, default=True, index=True)
+    # активен / неактивен
+    is_disposable = Column(Boolean, nullable=False, default=False)
+    # одноразовый / многоразовый
     purpose = Column(Integer, nullable=False,
-                     default=PromocodePurpose.DISCOUNT.value)  # назначение промокода
-    end_date = Column(DateTime, nullable=True)  # дата окончания действия промокода
-    used_count = Column(Integer, default=0)  # количество использований
-    usage_limit = Column(Integer, default=1)  # лимит использований
+                     default=PromocodePurpose.DISCOUNT.value)
+    # назначение промокода
+    end_date = Column(DateTime, nullable=True)
+    # дата окончания действия промокода
+    used_count = Column(Integer, default=0)
+    # количество использований
+    usage_limit = Column(Integer, default=1, nullable=True)
+    # лимит использований
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'),
-                     nullable=True, index=True)  # ID пользователя, который создал промокод
+                     nullable=True, index=True)
+    # ID пользователя, который создал промокод
+    target_user_ids = Column(
+        ARRAY(Integer), default=None, nullable=True
+        )   # type: ignore
     user = relationship(
         "User",
         back_populates="promocodes"

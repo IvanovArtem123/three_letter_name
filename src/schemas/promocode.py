@@ -4,7 +4,7 @@ from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, StringConstraints
 from pydantic.config import Extra
 
-from constants import PROMOCODE_MIN_LEN, PROMOCODE_MAX_LEN
+from .constants import PROMOCODE_MIN_LEN, PROMOCODE_MAX_LEN
 
 
 CodeStr = Annotated[
@@ -20,12 +20,12 @@ CodeStr = Annotated[
 class PromocodeCreate(BaseModel):
     """Схема для создания промокода."""
 
-    user_id: int
+    is_active: bool
     code: Optional[CodeStr] = None
-    subscription_id: Optional[int] = None
     usage_limit: Optional[int] = 1
-    purpose: Optional[int] = 1
+    purpose: Optional[int] = 0
     end_date: Optional[str] = None
+    target_user_ids: Optional[list[int]] = None
 
     model_config = ConfigDict(extra=Extra.forbid)
 
@@ -38,7 +38,7 @@ class PromocodeShortInfo(BaseModel):
     code: str
     subscription_id: Optional[int] = None
     purpose: int
-    end_date: str
+    end_date: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -14,6 +14,8 @@ class ServiceCallback(StatesGroup):
     pay_sub_menu = State()
     price_list_menu = State()
     manage_sub_menu = State()
+    promocodes_menu = State()
+    promo_price_list_menu = State()
 
     help_menu = State()
     support_chat_menu = State()

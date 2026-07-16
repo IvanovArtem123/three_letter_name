@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
 from models.subscription import Subscription_Date_Levels
+from crud.promocode import promocode_crud
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def setup_end_date_subscription(start_date: datetime, level: int) -> datetime:

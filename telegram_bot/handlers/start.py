@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from keyboards.start import start_keyboard
-from manage_users import ManageUser
+from services.user import UserService
 from .utils import ServiceCallback
 
 router = Router()
@@ -15,7 +15,7 @@ async def cmd_start(message: Message, session, state: FSMContext):
         await message.answer('Не удалось определить пользователя.'
                              ' Попробуйте позже.')
         return
-    manage_user = ManageUser(
+    manage_user = UserService(
         user_tg_id=message.from_user.id,
         username_tg=message.from_user.username,
         client_session=session)

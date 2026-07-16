@@ -1,5 +1,6 @@
 from typing import Annotated, List
 
+from faststream.rabbit.fastapi import RabbitRouter
 from fastapi import APIRouter, Depends, Path, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.params import Body
@@ -20,7 +21,8 @@ from core.constants import (
 )
 
 
-router = APIRouter(prefix='/panels', tags=['Панели'])
+router = RabbitRouter(url="amqp://rabbitmq:rabbitmq@localhost:5672",
+                      prefix='/panels', tags=['Панели'])
 
 
 @router.get(

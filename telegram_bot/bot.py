@@ -4,7 +4,7 @@ import aiohttp
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from config import TOKEN
-from handlers import start, subscriptions, help, cancel
+from handlers import start, subscriptions, help, cancel, promocodes
 from handlers.error import ErrorHandlingMiddleware
 
 logging.basicConfig(level=logging.INFO)
@@ -19,6 +19,7 @@ dp.include_router(start.router)
 dp.include_router(cancel.router)
 dp.include_router(subscriptions.router)
 dp.include_router(help.router)
+dp.include_router(promocodes.router)
 
 session: aiohttp.ClientSession = None
 
