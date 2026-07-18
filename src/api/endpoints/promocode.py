@@ -16,7 +16,9 @@ from crud.panel import panel_crud
 from api.validators.promocode import (check_data_promocode,
                                       get_promo_or_404_by_id,
                                       get_promo_or_404_by_code,
-                                      check_permission_promo)
+                                      check_permission_promo,
+                                      check_count_usage,
+                                      check_is_active_promocode)
 
 
 router = APIRouter(prefix='/promocodes', tags=['Промокоды'])
@@ -93,6 +95,8 @@ async def activate_promocode(
     promocode_obj = await get_promo_or_404_by_code(
         session=session,
         code=promocode)
+    await check_count_usage(promocode_obj=promocode_obj)
+    await check_is_active_promocode(promocode_obj=promocode_obj)
     if promocode_obj.purpose == PromocodePurpose.GIFT_SUBSCRIPTION:
         sub_create_schema = SubscriptionCreate(
             end_date_level=promocode_obj.sub_level, user_id=user.id)
@@ -102,12 +106,6 @@ async def activate_promocode(
             panels=panels,
             session=session
             )
-        promocode_activated = await promocode_crud.activate_gift_promo(
+    promocode_activated = await promocode_crud.activate_promocode(
             session=session, promocode=promocode_obj, sub_id=new_sub.id)
-    if promocode_obj.purpose == PromocodePurpose.DISCOUNT:
-        promocode_activated = await promocode_crud.activate_discount_promo(
-            id=promocode_obj.id)
-    if promocode_obj.purpose == PromocodePurpose.REFERRAL:
-        promocode_activated = await promocode_crud.activate_referal_promo(
-            id=promocode_obj.id)
     return promocode_activated

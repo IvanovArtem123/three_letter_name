@@ -70,3 +70,20 @@ async def check_permission_promo(
          ) and (not await check_current_user_admin(user))):
         return forbidden('У вас недостаточно прав для создания '
                          'скидочного промокода.')
+
+
+async def check_count_usage(promocode: Promocode) -> None:
+    '''
+    Проверека количества активаций. Если количество активаций равняется
+    количеству допустимых активаций ставится значение is_active=False.
+    '''
+    if promocode.used_count == promocode.usage_limit:
+        await promocode_crud.deactivate_promo(promocode=promocode)
+        return bad_request('Количество активаций уже равняется количеству '
+                           'возможных активаций. Промокод деактивирован.')
+
+
+async def check_is_active_promocode(promocode: Promocode) -> None:
+    '''Проверка активен ли промокод.'''
+    if promocode.is_active is False:
+        return bad_request('Промокод деактивирован.')

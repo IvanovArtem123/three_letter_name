@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -44,19 +46,32 @@ class CRUDPromocode(CRUDBase[Promocode, PromocodeCreate, PromocodeInfo]):
         await session.refresh(promocode)
         return promocode
 
-    async def activate_gift_promo(
+    async def activate_promocode(
         self,
         session: AsyncSession,
         promocode: Promocode,
-        sub_id: int
+        sub_id: Optional[int] = None
     ) -> Promocode:
         promocode.is_activated = True
         promocode.used_count += 1
-        promocode.sub_id = sub_id
+        if promocode.sub_id:
+            promocode.sub_id = sub_id
+        
         session.add(promocode)
         await session.commit()
         await session.refresh(promocode)
         return promocode
 
+    async def deactivate_promo(
+        self,
+        session: AsyncSession,
+        promocode: Promocode
+     ) -> Promocode:
+        '''Деактивация промокода.'''
+        promocode.is_active = False
+        session.add(promocode)
+        await session.commit()
+        await session.refresh(promocode)
+        return promocode
 
 promocode_crud = CRUDPromocode(Promocode)
