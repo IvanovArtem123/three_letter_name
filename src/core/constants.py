@@ -21,9 +21,6 @@ CHECK_MAIL_FORMAT = (r"email IS NULL OR email ~ '^[a-zA-Z0-9]"
 
 TOKEN_PANEL = os.getenv('TOKEN_PANEL')
 
-EXAMPLE_PATH_PANEL = os.getenv('EXAMPLE_PATH_PANEL')
-EXAMPLE_DOMAIN_PANEL = os.getenv('EXAMPLE_DOMAIN_PANEL')
-EXAMPLE_PORT_PANEL = os.getenv('EXAMPLE_PORT_PANEL')
 SERVER_METADATA_URL = ('https://accounts.google.com/'
                        '.well-known/openid-configuration')
 

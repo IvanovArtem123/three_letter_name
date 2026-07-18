@@ -13,7 +13,7 @@ from .services import setup_end_date_subscription
 
 
 class CRUDSub(CRUDBase[Subscription, SubscriptionCreate, SubscriptionUpdate]):
-    """CRUD для пользовательской подписки."""
+    '''CRUD для пользовательской подписки.'''
 
     async def create_subscription(
         self,
@@ -21,7 +21,7 @@ class CRUDSub(CRUDBase[Subscription, SubscriptionCreate, SubscriptionUpdate]):
         panels: list[Panel],
         session: AsyncSession
     ):
-        """Создание подписки."""
+        '''Создание подписки.'''
         end_date = setup_end_date_subscription(
             start_date=datetime.now(timezone.utc),
             level=obj_in.end_date_level
@@ -44,7 +44,7 @@ class CRUDSub(CRUDBase[Subscription, SubscriptionCreate, SubscriptionUpdate]):
         user_id: int,
         session: AsyncSession
     ) -> Sequence[Subscription]:
-        """Получить все подписки пользователя по его id."""
+        '''Получить все подписки пользователя по его id.'''
         result = await session.execute(
             select(Subscription).where(Subscription.user_id == user_id)
         )
@@ -56,7 +56,7 @@ class CRUDSub(CRUDBase[Subscription, SubscriptionCreate, SubscriptionUpdate]):
         sub_code: str,
         session: AsyncSession
     ) -> Subscription | None:
-        """Получить подписку по ее коду."""
+        '''Получить подписку по ее коду.'''
         result = await session.execute(
             select(Subscription).where(Subscription.code == sub_code)
         )

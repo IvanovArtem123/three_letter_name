@@ -6,7 +6,7 @@ from .many_to_many import subscription_panels
 
 
 class Panel(BaseModel):
-    """Модель панели."""
+    '''Модель панели.'''
 
     path = Column(String(150), nullable=False)
     domain = Column(String(150), nullable=False)
@@ -15,8 +15,8 @@ class Panel(BaseModel):
     password = Column(String(255), nullable=False)
     country = Column(String(150), nullable=False)
     subscriptions = relationship(
-        "Subscription",
+        'Subscription',
         secondary=subscription_panels,
-        back_populates="panels",
+        back_populates='panels',
         lazy='selectin'
     )

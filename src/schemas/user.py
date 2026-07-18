@@ -18,7 +18,7 @@ UsernameStr = Annotated[
 
 
 class UserShortInfo(BaseModel):
-    """Сокращённая информация о пользователе."""
+    '''Сокращённая информация о пользователе.'''
 
     id: int
     username: str
@@ -31,14 +31,14 @@ class UserShortInfo(BaseModel):
 
 
 class TelegramLoginSchema(BaseModel):
-    """Модель для создания пользователя."""
+    '''Модель для создания пользователя.'''
     username: UsernameStr
     tg_id: int
     email: str
 
 
 class UserInfo(UserShortInfo):
-    """Полная информация о пользователе."""
+    '''Полная информация о пользователе.'''
 
     role: UserRole
     created_at: datetime
@@ -50,7 +50,7 @@ class UserInfo(UserShortInfo):
 
 
 class UserUpdate(BaseModel):
-    """Модель для частичного обновления пользователя."""
+    '''Модель для частичного обновления пользователя.'''
     new: Optional[bool] = None
     tg_id: Optional[int] = None
     role: Optional[UserRole] = None

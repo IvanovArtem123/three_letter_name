@@ -11,7 +11,7 @@ async def check_unique_email_username_phone_tgid(
     user_obj: UserUpdate,
     session: AsyncSession
 ) -> None:
-    """Проверка на уникальность tg_id."""
+    '''Проверка на уникальность tg_id.'''
     conditions = []
     if user_obj.tg_id:
         conditions.append(User.tg_id == user_obj.tg_id)
@@ -33,7 +33,7 @@ async def check_unique_email_username_phone_tgid(
 async def check_current_user_admin(
     user: User
 ) -> bool:
-    """Проверка является юзер админом или суперюзером."""
+    '''Проверка является юзер админом или суперюзером.'''
     if user.role == UserRole.ADMIN or user.role == UserRole.SUPER_USER:
         return True
     return False
@@ -43,7 +43,7 @@ async def get_user_or_404(
     user_id: int,
     session: AsyncSession
 ) -> User:
-    """Получить пользователя по id или 404 ошибку."""
+    '''Получить пользователя по id или 404 ошибку.'''
     result = await user_crud.get(session=session, obj_id=user_id)
     if not result:
         raise not_found('Пользователь не найден.')
@@ -54,7 +54,7 @@ async def get_user_by_tg_id_or_404(
     tg_id: int,
     session: AsyncSession
 ) -> User:
-    """Получить пользователя по Telegram id или 404 ошибку."""
+    '''Получить пользователя по Telegram id или 404 ошибку.'''
     result = await user_crud.get_by_tg_id(session=session, tg_id=tg_id)
     if not result:
         raise not_found('Пользователь не найден.')

@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def setup_end_date_subscription(start_date: datetime, level: int) -> datetime:
-    """Установка даты окончания подписки."""
+    '''Установка даты окончания подписки.'''
     match level:
         case Subscription_Date_Levels.DAY:
             return start_date + timedelta(days=1)

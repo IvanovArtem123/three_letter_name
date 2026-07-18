@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 
 class AuthData(BaseModel):
-    """Входные данные при авторизации (форма: login + password)."""
+    '''Входные данные при авторизации (форма: login + password).'''
 
     login: str = Field(..., description='Email или телефон')
     password: str = Field(..., description='Пароль')
@@ -16,12 +16,12 @@ class AuthData(BaseModel):
         login: Annotated[str, Form(..., description='Email или телефон')],
         password: Annotated[str, Form(..., description='Пароль')],
     ) -> 'AuthData':
-        """Собирает модель из полей HTML-формы (login, password)."""
+        '''Собирает модель из полей HTML-формы (login, password).'''
         return cls(login=login, password=password)
 
 
 class AuthToken(BaseModel):
-    """Ответ при успешной авторизации."""
+    '''Ответ при успешной авторизации.'''
 
     access_token: str
     token_type: str = 'bearer'

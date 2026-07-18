@@ -12,7 +12,7 @@ from core.constants import (
 
 
 class UserRole(IntEnum):
-    """Роль пользователя."""
+    '''Роль пользователя.'''
 
     USER = 0
     ADMIN = 1
@@ -26,9 +26,9 @@ class User(BaseModel):
     )
 
     subscriptions = relationship(
-        "Subscription",
-        backref="user",
-        cascade="all, delete-orphan",
+        'Subscription',
+        backref='user',
+        cascade='all, delete-orphan',
         passive_deletes=True
     )
 
@@ -44,8 +44,8 @@ class User(BaseModel):
     tg_id = Column(BigInteger, unique=True, nullable=True)
     new = Column(Boolean, nullable=False, default=True)
     promocodes = relationship(
-        "Promocode",
-        back_populates="user",
-        cascade="all, delete-orphan",
+        'Promocode',
+        back_populates='user',
+        cascade='all, delete-orphan',
         passive_deletes=True
     )

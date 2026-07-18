@@ -12,10 +12,10 @@ UpdateSchemaType = TypeVar('UpdateSchemaType', bound=BaseModel)
 
 
 class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
-    """Базовый CRUD класс."""
+    '''Базовый CRUD класс.'''
 
     def __init__(self, model: type[ModelType]) -> None:
-        """Сохранить класс ORM-модели, с которой работает CRUD."""
+        '''Сохранить класс ORM-модели, с которой работает CRUD.'''
         self.model = model
 
     async def get_all(
@@ -37,7 +37,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         obj_id: int,
         session: AsyncSession,
     ) -> Optional[ModelType]:
-        """Вернуть объект по ID или None."""
+        '''Вернуть объект по ID или None.'''
         return await session.get(self.model, obj_id)
 
     async def create(
@@ -45,7 +45,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         obj_in: CreateSchemaType,
         session: AsyncSession,
     ) -> ModelType:
-        """Создать объект из схемы `obj_in` и вернуть его."""
+        '''Создать объект из схемы `obj_in` и вернуть его.'''
         obj_in_data = obj_in.model_dump()
         db_obj = self.model(**obj_in_data)
         session.add(db_obj)
@@ -59,7 +59,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         obj_in: UpdateSchemaType,
         session: AsyncSession,
     ) -> ModelType:
-        """Обновление объекта."""
+        '''Обновление объекта.'''
         obj_data = jsonable_encoder(db_obj)
         update_data = obj_in.model_dump(exclude_unset=True)
         for field in obj_data:

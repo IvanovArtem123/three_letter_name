@@ -25,7 +25,7 @@ async def get_promo_codes(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[User, Depends(get_current_user)]
 ) -> List[PromocodeInfo]:
-    """Получение списка промокодов для конкретного пользователя или админа."""
+    '''Получение списка промокодов для конкретного пользователя или админа.'''
     promocodes = await promocode_crud.get_all(session=session)
     return promocodes
 
@@ -39,7 +39,7 @@ async def delete_promocode(
     user: Annotated[User, Depends(get_current_user)],
     promocode_id: Annotated[int, Path(title='ID промокода')]
 ):
-    """Удаление промокода для конкретного пользователя или админа."""
+    '''Удаление промокода для конкретного пользователя или админа.'''
     promocode = await get_promo_or_404(session, promocode_id)
     await promocode_crud.delete(session=session, db_obj=promocode)
     return {'message': 'Промокод успешно удален'}
@@ -56,7 +56,7 @@ async def create_promocode(
     user: Annotated[User, Depends(get_current_user)],
     obj_in: PromocodeCreate
 ) -> PromocodeShortInfo:
-    """Создание промокода."""
+    '''Создание промокода.'''
     if obj_in.code is None:
         obj_in.code = await making_promocode()
     await check_data_promocode(obj_in)

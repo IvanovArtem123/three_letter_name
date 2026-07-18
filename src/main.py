@@ -12,12 +12,12 @@ app.add_middleware(
     secret_key=settings.SECRET,
     max_age=60 * 60 * 24 * 7,
     https_only=False,
-    same_site="lax",
+    same_site='lax',
 )
 
 
 app.include_router(api_router)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import uvicorn
-    uvicorn.run("main:app", host="localhost", port=8000, reload=True)
+    uvicorn.run('main:app', host='localhost', port=8000, reload=True)

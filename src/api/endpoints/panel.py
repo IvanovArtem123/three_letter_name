@@ -1,7 +1,7 @@
 from typing import Annotated, List
 
 from faststream.rabbit.fastapi import RabbitRouter
-from fastapi import APIRouter, Depends, Path, status
+from fastapi import Depends, Path, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.params import Body
 
@@ -14,14 +14,9 @@ from api.validators.user import check_current_user_admin
 from api.validators.panel import get_panel_or_404
 from api.exceptions import forbidden
 from models.user import User
-from core.constants import (
-    EXAMPLE_PATH_PANEL,
-    EXAMPLE_DOMAIN_PANEL,
-    EXAMPLE_PORT_PANEL
-)
 
 
-router = RabbitRouter(url="amqp://rabbitmq:rabbitmq@localhost:5672",
+router = RabbitRouter(url='amqp://rabbitmq:rabbitmq@localhost:5672',
                       prefix='/panels', tags=['Панели'])
 
 
@@ -72,21 +67,9 @@ async def get_all_panels(
 )
 async def add_panel(
     session: Annotated[AsyncSession, Depends(get_async_session)],
-    obj_in: PanelCreate = Body(
-                openapi_examples={
-                    'Panel1': {
-                        'summary': 'Пример панели',
-                        'value': {
-                            'path': EXAMPLE_PATH_PANEL,
-                            'domain': EXAMPLE_DOMAIN_PANEL,
-                            'port': EXAMPLE_PORT_PANEL,
-                            'country': 'Германия'
-                        }
-                    }
-                }
-            )
+    obj_in: PanelCreate
 ) -> PanelShortInfo:
-    """Добавляет в бд новую модель."""
+    '''Добавляет в бд новую модель.'''
     panel = await panel_crud.create(obj_in=obj_in, session=session)
     return panel
 
@@ -121,7 +104,7 @@ async def del_panel(
     panel_id: Annotated[int, Path(title='ID панели')],
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> None:
-    """Удаляет панель из бд. Только для админов."""
+    '''Удаляет панель из бд. Только для админов.'''
     if not await check_current_user_admin(user):
         return forbidden('У вас недостаточно прав для удаления панели.')
     panel = await panel_crud.get(obj_id=panel_id, session=session)

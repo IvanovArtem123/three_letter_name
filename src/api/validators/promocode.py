@@ -6,7 +6,7 @@ from models.subscription import Subscription_Date_Levels
 
 
 async def check_data_promocode(promo_data: PromocodeCreate):
-    """Проверка данных о промокоде."""
+    '''Проверка данных о промокоде.'''
     if promo_data.purpose == PromocodePurpose.GIFT_SUBSCRIPTION:
         if promo_data.end_date:
             return bad_request('У подарочного промокода не может '
@@ -44,7 +44,7 @@ async def check_data_promocode(promo_data: PromocodeCreate):
 
 
 async def get_promo_or_404(session, id: int):
-    """Получение промокода по его коду или возврат ошибки 404."""
+    '''Получение промокода по его коду или возврат ошибки 404.'''
     promocode = await promocode_crud.get(session=session, obj_id=id)
     if not promocode:
         return not_found('Промокод не найден.')

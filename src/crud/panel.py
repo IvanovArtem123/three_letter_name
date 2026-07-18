@@ -8,7 +8,7 @@ from models.panel import Panel
 
 
 class CRUDPanel(CRUDBase[Panel, PanelCreate, PanelUpdate]):
-    """CRUD для панели управления."""
+    '''CRUD для панели управления.'''
 
 
 panel_crud = CRUDPanel(Panel)

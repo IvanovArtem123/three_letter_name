@@ -16,7 +16,7 @@ class CRUDUser(CRUDBase[User, TelegramLoginSchema, UserUpdate]):
             obj_in: UserUpdate,
             session: AsyncSession
     ) -> User:
-        """Обновить пользователя с хэшированием пароля."""
+        '''Обновить пользователя с хэшированием пароля.'''
         obj_in_data = obj_in.model_dump(exclude_unset=True)
         if 'password' in obj_in_data:
             password_hash = await hash_password(obj_in_data.pop('password'))
@@ -33,7 +33,7 @@ class CRUDUser(CRUDBase[User, TelegramLoginSchema, UserUpdate]):
         user_id: int,
         session: AsyncSession
     ) -> str | None:
-        """Получить uuid пользователя по его id."""
+        '''Получить uuid пользователя по его id.'''
         result = await session.execute(
             select(User.uuid).where(User.id == user_id)
         )
@@ -44,7 +44,7 @@ class CRUDUser(CRUDBase[User, TelegramLoginSchema, UserUpdate]):
         session: AsyncSession,
         tg_id: str
     ) -> User | None:
-        """Получить пользователя по его Telegram id."""
+        '''Получить пользователя по его Telegram id.'''
         result = await session.execute(
             select(User).where(User.tg_id == tg_id)
         )

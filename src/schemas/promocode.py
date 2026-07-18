@@ -21,7 +21,7 @@ CodeStr = Annotated[
 
 
 class PromocodeCreate(BaseModel):
-    """Схема для создания промокода."""
+    '''Схема для создания промокода.'''
 
     is_active: bool
     purpose: int
@@ -35,7 +35,7 @@ class PromocodeCreate(BaseModel):
 
 
 class PromocodeShortInfo(BaseModel):
-    """Краткая информация о промокоде."""
+    '''Краткая информация о промокоде.'''
 
     id: int
     is_active: bool
@@ -58,7 +58,7 @@ class PromocodeShortInfo(BaseModel):
 
 
 class PromocodeInfo(PromocodeShortInfo):
-    """Схема для отображения информации о промокоде."""
+    '''Схема для отображения информации о промокоде.'''
 
     is_active: bool
     usage_limit: int

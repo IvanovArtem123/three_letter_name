@@ -8,7 +8,7 @@ from .constants import MAX_LEN_PROMOCODE
 
 
 class PromocodePurpose(IntEnum):
-    """Назначения промокода."""
+    '''Назначения промокода.'''
 
     GIFT_SUBSCRIPTION = 0
     DISCOUNT = 1
@@ -20,7 +20,7 @@ class PromocodePurpose(IntEnum):
 
 
 class Promocode(BaseModel):
-    """МОдель промокода."""
+    '''МОдель промокода.'''
     code = Column(String(MAX_LEN_PROMOCODE), nullable=False, unique=True,
                   index=True)
     is_active = Column(Boolean, nullable=False, default=True, index=True)
@@ -44,13 +44,13 @@ class Promocode(BaseModel):
         ARRAY(Integer), default=None, nullable=True
         )   # type: ignore
     user = relationship(
-        "User",
-        back_populates="promocodes"
+        'User',
+        back_populates='promocodes'
     )
 
     @validates('code')
     def convert_upper(self, key, value):
-        """Автоматически преобразует промокод в верхний регистр"""
+        '''Автоматически преобразует промокод в верхний регистр'''
         if isinstance(value, str):
             return value.upper()
         return value

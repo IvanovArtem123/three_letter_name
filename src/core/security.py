@@ -8,14 +8,14 @@ from core.config import settings
 
 
 async def hash_password(password: str) -> str:
-    """Вернуть хэш для заданного пароля bcrypt."""
+    '''Вернуть хэш для заданного пароля bcrypt.'''
     salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
     return hashed.decode('utf-8')
 
 
 async def verify_password(plain_password: str, password_hash: str) -> bool:
-    """Проверить соответствие пароля его хэшу."""
+    '''Проверить соответствие пароля его хэшу.'''
     return bcrypt.checkpw(
         plain_password.encode('utf-8'),
         password_hash.encode('utf-8')
@@ -26,7 +26,7 @@ def create_access_token(
     subject: str,
     expires_in_minutes: Optional[int] = None,
 ) -> str:
-    """Создать JWT с sub=<subject> и TTL (мин)."""
+    '''Создать JWT с sub=<subject> и TTL (мин).'''
     ttl = (
         expires_in_minutes
         if expires_in_minutes is not None
@@ -42,11 +42,11 @@ def create_access_token(
 
 
 class TokenError(JWTError):
-    """Общий класс ошибок токена для унификации обработки."""
+    '''Общий класс ошибок токена для унификации обработки.'''
 
 
 def decode_token(token: str) -> dict[str, Any]:
-    """Декодировать JWT и вернуть payload."""
+    '''Декодировать JWT и вернуть payload.'''
     try:
         return jwt.decode(
             token,

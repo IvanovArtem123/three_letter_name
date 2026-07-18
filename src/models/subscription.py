@@ -10,7 +10,7 @@ from .many_to_many import subscription_panels
 
 
 class SubscriptionStatus(IntEnum):
-    """Статусы подписки."""
+    '''Статусы подписки.'''
 
     NON_ACTIVE = 0
     ACTIVE = 1
@@ -22,7 +22,7 @@ class SubscriptionStatus(IntEnum):
 
 
 class Subscription_Date_Levels(IntEnum):
-    """Уровни даты подписки."""
+    '''Уровни даты подписки.'''
 
     DAY = 1
     WEEK = 2
@@ -37,14 +37,14 @@ class Subscription_Date_Levels(IntEnum):
 
 
 class Subscription(BaseModel):
-    """Модель пользовательской подписки."""
+    '''Модель пользовательской подписки.'''
 
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
     end_date = Column(DateTime(timezone=True), nullable=True)
     panels = relationship(
-        "Panel",
+        'Panel',
         secondary=subscription_panels,
-        back_populates="subscriptions",
+        back_populates='subscriptions',
         lazy='selectin'
     )
     code = Column(

@@ -28,7 +28,7 @@ router = APIRouter(prefix='/users', tags=['Пользователи'])
 async def get_current_user_info(
     user: Annotated[User, Depends(get_current_user)]
 ) -> UserInfo:
-    """Получить информацию о текущем пользователе."""
+    '''Получить информацию о текущем пользователе.'''
     return user
 
 
@@ -57,7 +57,7 @@ async def get_user_info(
     user: Annotated[User, Depends(get_current_user)],
     user_id: int,
 ) -> UserShortInfo:
-    """Получить информацию о пользователе."""
+    '''Получить информацию о пользователе.'''
     if await check_current_user_admin(user):
         user = await get_user_or_404(user_id, session)
     return user
@@ -83,7 +83,7 @@ async def update_user(
             }
         }),
 ) -> UserShortInfo:
-    """Обновить информацию о пользователе."""
+    '''Обновить информацию о пользователе.'''
     if ((not await check_current_user_admin(user)) and
             (not (user.id == user_id))):
         return bad_request(
@@ -111,7 +111,7 @@ async def delete_user(
     user: Annotated[User, Depends(get_current_user)],
     user_id: int,
 ) -> None:
-    """Удалить пользователя."""
+    '''Удалить пользователя.'''
     if not (await check_current_user_admin(user) or
             (user.id == user_id)):
         return bad_request('Недостаточно прав для удаления пользователя.')
@@ -120,7 +120,7 @@ async def delete_user(
         await user_crud.delete(db_obj=user, session=session)
 
 
-@router.post('/login_tg', summary="Вход через Telegram")
+@router.post('/login_tg', summary='Вход через Telegram')
 async def login_tg(
     login_data: TelegramLoginSchema,
     session: Annotated[AsyncSession, Depends(get_async_session)],
@@ -137,8 +137,8 @@ async def login_tg(
     return user
 
 
-@router.get("/get_by_tg_id/{tg_id}",
-            summary="Получить информацию о пользователе по Telegram id")
+@router.get('/get_by_tg_id/{tg_id}',
+            summary='Получить информацию о пользователе по Telegram id')
 async def get_by_tg_id(
     tg_id: int,
     session: Annotated[AsyncSession, Depends(get_async_session)],

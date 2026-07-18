@@ -1,4 +1,3 @@
-from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,14 +7,14 @@ from schemas.promocode import PromocodeCreate, PromocodeInfo
 
 
 class CRUDPromocode(CRUDBase[Promocode, PromocodeCreate, PromocodeInfo]):
-    """CRUD для пользовательских промокодов."""
+    '''CRUD для пользовательских промокодов.'''
 
     async def get_code(
         self,
         session: AsyncSession,
         code: str
     ) -> Promocode | None:
-        """Получить промокод по его коду."""
+        '''Получить промокод по его коду.'''
         result = await session.execute(
             select(Promocode).where(Promocode.code == code)
         )
@@ -27,7 +26,7 @@ class CRUDPromocode(CRUDBase[Promocode, PromocodeCreate, PromocodeInfo]):
             session: AsyncSession,
             obj_in: PromocodeCreate,
             user_id: int) -> Promocode:
-        """Создание промокода для конкретного пользователя."""
+        '''Создание промокода для конкретного пользователя.'''
         promocode = Promocode(
             code=obj_in.code,
             is_active=obj_in.is_active,

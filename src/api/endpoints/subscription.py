@@ -40,8 +40,8 @@ async def create_subscription(
     user: Annotated[User, Depends(get_current_user)],
     obj_in: SubscriptionCreate
 ) -> SubscriptionShortInfo:
-    """Создание подписки для пользователя.
-    Для конкретного пользователя или админа."""
+    '''Создание подписки для пользователя.
+    Для конкретного пользователя или админа.'''
     if not (await check_current_user_admin(user) or user.id == obj_in.user_id):
         obj_in.user_id = user.id
     if obj_in.is_trial:
@@ -65,7 +65,7 @@ async def create_subscription(
     await obj.add_client_to_inbounds()
     return SubscriptionShortInfo(
         **new_sub.to_dict(),
-        sub_link=f"{settings.BASE_URL}/api/sub/{new_sub.code}")
+        sub_link=f'{settings.BASE_URL}/api/sub/{new_sub.code}')
 
 
 @router.get(
@@ -97,7 +97,7 @@ async def get_keys_by_sub_code(
     sub_code: Annotated[str, Path(description='Код подписки')],
     session: AsyncSession = Depends(get_async_session)
 ) -> SubscriptionInfo:
-    """Получение всех ключей пользователя по коду подписки."""
+    '''Получение всех ключей пользователя по коду подписки.'''
     sub = await sub_or_404(
         sub_code=sub_code,
         session=session
@@ -129,7 +129,7 @@ async def get_keys_by_sub_code(
             'Content-Type': 'text/plain; charset=utf-8',
             'Profile-Title': 'Soul Goodman VPN',
             'announce': f'base64:{base64.b64encode(
-                ANNOUNCE_HAPP.encode("utf-8")).decode("utf-8")}',
+                ANNOUNCE_HAPP.encode('utf-8')).decode('utf-8')}',
             'Subscription-Userinfo': f'expire={int(sub.end_date.timestamp())}'
         })
 

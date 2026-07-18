@@ -76,7 +76,7 @@ class SubscriptionCreate(SubscriptionUpdate):
     is_trial: Optional[bool] = False
     is_gift: Optional[bool] = False
 
-    @model_validator(mode="after")
+    @model_validator(mode='after')
     def _check_trial_and_gift_field(self):
         if self.is_trial is True and self.is_gift is True:
             raise ValueError('Подписка не может быть одновременно '
@@ -99,7 +99,7 @@ class SubscriptionShortInfo(BaseModel):
     @model_validator(mode='after')
     def set_sub_link(self):
         if not self.sub_link and self.code:
-            self.sub_link = f"{settings.BASE_URL}/api/sub/{self.code}"
+            self.sub_link = f'{settings.BASE_URL}/api/sub/{self.code}'
         return self
 
 

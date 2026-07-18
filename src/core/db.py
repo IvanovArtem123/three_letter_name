@@ -37,7 +37,7 @@ AsyncSessionLocal = async_sessionmaker(
 
 
 async def get_async_session() -> AsyncIterator[AsyncSession]:
-    """Возвращает асинхронную сессию БД для зависимостей FastAPI."""
+    '''Возвращает асинхронную сессию БД для зависимостей FastAPI.'''
     async with AsyncSessionLocal() as session:
         try:
             yield session

@@ -32,28 +32,28 @@ async def get_current_user(
     request: Request,
     session: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> UserInfo:
-    """Возвращает текущего пользователя по сессии."""
-    bot_secret = request.headers.get("X-Bot-Secret")
+    '''Возвращает текущего пользователя по сессии.'''
+    bot_secret = request.headers.get('X-Bot-Secret')
     if bot_secret is not None:
         if bot_secret != settings.TG_BOT_SECRET:
-            raise HTTPException(status_code=403, detail="Forbidden")
-        tg_id = request.headers.get("X-TG-ID")
+            raise HTTPException(status_code=403, detail='Forbidden')
+        tg_id = request.headers.get('X-TG-ID')
         if tg_id is None:
             raise HTTPException(status_code=400,
-                                detail="X-TG-ID header required")
+                                detail='X-TG-ID header required')
         query = select(User).where(
             User.tg_id == int(tg_id)).options(load_only(*USER_FIELDS_TO_LOAD))
         result = await session.execute(query)
         user = result.scalars().first()
         if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=404, detail='User not found')
         return UserInfo.model_validate(user)
-    user_id = request.session.get("user_id")
+    user_id = request.session.get('user_id')
 
     if user_id is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
+            detail='Not authenticated',
         )
 
     try:
@@ -62,7 +62,7 @@ async def get_current_user(
         request.session.clear()
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid session",
+            detail='Invalid session',
         )
 
     query = (
@@ -77,7 +77,7 @@ async def get_current_user(
         request.session.clear()
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
+            detail='User not found',
         )
 
     return UserInfo.model_validate(user)
@@ -139,7 +139,7 @@ async def get_inbound_transport(
 
 
 async def making_promocode(code_len: int = 10) -> str:
-    """Генерация случайного промокода."""
+    '''Генерация случайного промокода.'''
     import random
     import string
 

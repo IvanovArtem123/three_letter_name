@@ -33,7 +33,7 @@ class ManageUserUI():
             response = await self.client.get(url=url, headers=self.headers)
             return json.loads(response.text)
         except httpx.HTTPError as e:
-            return f"Ошибка при получении списка inbounds: {e}"
+            return f'Ошибка при получении списка inbounds: {e}'
 
     async def _get_inbound_info(self, inbound_id: int, base_url_panel: str):
         '''Получение информации об Inbound.'''
@@ -42,7 +42,7 @@ class ManageUserUI():
             response = await self.client.get(url=url, headers=self.headers)
             return json.loads(response.text)
         except httpx.HTTPError as e:
-            return f"Ошибка при получении информации об Inbound: {e}"
+            return f'Ошибка при получении информации об Inbound: {e}'
 
     async def _add_inbound(self):
         '''Добавление Inbound.'''
@@ -60,24 +60,24 @@ class ManageUserUI():
         '''Добавление клиента.'''
         url = (f'{base_url_panel}/panel/api/clients/add')
         data = {
-            "client": {
-                "email": self.user.email,
-                "totalGB": 0,
-                "expiryTime": int(self.sub.end_date.timestamp() * 1000),
-                "tgId": self.user.tg_id,
-                "limitIp": 0,
-                "subId": self.sub.code,
-                "flow": 'xtls-rprx-vision',
-                "enable": True
+            'client': {
+                'email': self.user.email,
+                'totalGB': 0,
+                'expiryTime': int(self.sub.end_date.timestamp() * 1000),
+                'tgId': self.user.tg_id,
+                'limitIp': 0,
+                'subId': self.sub.code,
+                'flow': 'xtls-rprx-vision',
+                'enable': True
             },
-            "inboundIds": inbound_ids
+            'inboundIds': inbound_ids
             }
         try:
             response = await self.client.post(
                 url=url, headers=self.headers, json=data)
             return json.loads(response.text)
         except httpx.HTTPError as e:
-            return f"Ошибка при добавлении клиента: {e}"
+            return f'Ошибка при добавлении клиента: {e}'
 
     async def _get_keys_user_in_panel(
             self, base_url_panel: str) -> list[str] | str:
@@ -88,12 +88,12 @@ class ManageUserUI():
             keys = response.json().get('obj')
             return keys
         except httpx.HTTPError as e:
-            return f"Ошибка при получении ключей: {e}"
+            return f'Ошибка при получении ключей: {e}'
 
     async def add_client_to_inbounds(self) -> None:
         '''Добавление клиента во все inbound панели управления.'''
         for panel in self.panels_list:
-            base_url_panel = f"https://{panel.domain}{panel.port}/{panel.path}"
+            base_url_panel = f'https://{panel.domain}{panel.port}/{panel.path}'
             inbounds = await self._get_list_inbounds(
                 base_url_panel=base_url_panel)  # Получаем список инбаундов
             inbound_ids = [inbound['id'] for inbound in inbounds['obj']]
@@ -104,7 +104,7 @@ class ManageUserUI():
         '''Получение всех ключей для подписки.'''
         all_keys: List[str | None] = []
         for panel in self.panels_list:
-            base_url_panel = f"https://{panel.domain}{panel.port}/{panel.path}"
+            base_url_panel = f'https://{panel.domain}{panel.port}/{panel.path}'
             keys_panel = await self._get_keys_user_in_panel(
                 base_url_panel=base_url_panel)
             if keys_panel is not None:
@@ -115,6 +115,6 @@ class ManageUserUI():
         '''Удаление всех клиентов для полученных inbounds.'''
         panels = self.sub.panels
         for panel in panels:
-            base_url_panel = f"https://{panel.domain}{panel.port}/{panel.path}"
+            base_url_panel = f'https://{panel.domain}{panel.port}/{panel.path}'
             url = (base_url_panel + '/panel/api/clients/del/{email}')
             await self.client.post(url=url, headers=self.headers)

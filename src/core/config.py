@@ -14,7 +14,7 @@ load_dotenv(ENV_INFRA, override=False)
 
 @dataclass(frozen=True)
 class Settings:
-    """Настройки проекта."""
+    '''Настройки проекта.'''
     app_title: str = 'SoulGoodman VPN API'
     database_url: str = os.getenv(
         'DATABASE_URL',
@@ -27,4 +27,4 @@ class Settings:
 
 
 settings = Settings()
-"""Экземпляр настроек для использования в проекте."""
+'''Экземпляр настроек для использования в проекте.'''

@@ -52,10 +52,10 @@ async def check_headers(
     '''Проверка заголовокв запроса,
     чтобы только при нужных заголовках возвращался True.'''
     headers = dict(request.headers)
-    user_agent = headers.get("user-agent")
-    x_app_version = headers.get("x-app-version")
+    user_agent = headers.get('user-agent')
+    x_app_version = headers.get('x-app-version')
     return (
         user_agent is not None and
         x_app_version is not None and
-        user_agent.startswith(f"Happ/{x_app_version}")
+        user_agent.startswith(f'Happ/{x_app_version}')
     )

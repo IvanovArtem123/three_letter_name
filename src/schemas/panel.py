@@ -39,7 +39,7 @@ CountryPanelStr = Annotated[
 
 
 class PanelShortInfo(BaseModel):
-    """Краткая информация о панели."""
+    '''Краткая информация о панели.'''
     id: int
     path: PathPanelStr
     domain: DomainPanelStr
@@ -50,7 +50,7 @@ class PanelShortInfo(BaseModel):
 
 
 class PanelCreate(BaseModel):
-    """Схема для добавления новой панели."""
+    '''Схема для добавления новой панели.'''
 
     path: PathPanelStr
     domain: DomainPanelStr
@@ -63,7 +63,7 @@ class PanelCreate(BaseModel):
 
 
 class PanelUpdate(BaseModel):
-    """Схема для обновления данных о панели."""
+    '''Схема для обновления данных о панели.'''
     path: Optional[PathPanelStr] = None
     domain: Optional[DomainPanelStr] = None
     port: Optional[str] = None
@@ -77,7 +77,7 @@ class PanelUpdate(BaseModel):
 
 
 class PanelInfo(PanelShortInfo):
-    """Полная информация о панели."""
+    '''Полная информация о панели.'''
     login: Annotated[str, StringConstraints(min_length=1, max_length=150)]
     password: Annotated[str, StringConstraints(min_length=1, max_length=255)]
 

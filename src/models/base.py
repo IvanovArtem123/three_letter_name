@@ -6,7 +6,7 @@ from core.db import Base
 
 
 class BaseModel(Base):
-    """Базовая модель."""
+    '''Базовая модель.'''
 
     __abstract__ = True
 
