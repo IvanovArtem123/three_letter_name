@@ -9,7 +9,7 @@ from schemas.promocode import PromocodeCreate, PromocodeInfo
 class CRUDPromocode(CRUDBase[Promocode, PromocodeCreate, PromocodeInfo]):
     '''CRUD для пользовательских промокодов.'''
 
-    async def get_code(
+    async def get_promocode_by_code(
         self,
         session: AsyncSession,
         code: str
@@ -30,6 +30,7 @@ class CRUDPromocode(CRUDBase[Promocode, PromocodeCreate, PromocodeInfo]):
         promocode = Promocode(
             code=obj_in.code,
             is_active=obj_in.is_active,
+            is_activated=False,
             purpose=obj_in.purpose,
             end_date=obj_in.end_date,
             used_count=0,

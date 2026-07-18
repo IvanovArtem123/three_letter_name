@@ -25,6 +25,7 @@ class Promocode(BaseModel):
                   index=True)
     is_active = Column(Boolean, nullable=False, default=True, index=True)
     # активен / неактивен
+    is_activated = Column(Boolean, nullable=False, default=False, index=True)
     purpose = Column(Integer, nullable=False,
                      default=PromocodePurpose.DISCOUNT.value)
     # назначение промокода

@@ -1,8 +1,10 @@
 from schemas.promocode import PromocodeCreate
-from api.exceptions import not_found, bad_request
+from api.exceptions import not_found, bad_request, forbidden
 from crud.promocode import promocode_crud
-from models.promocode import PromocodePurpose
+from models.promocode import PromocodePurpose, Promocode
 from models.subscription import Subscription_Date_Levels
+from models.user import User
+from api.validators.user import check_current_user_admin
 
 
 async def check_data_promocode(promo_data: PromocodeCreate):
@@ -42,10 +44,29 @@ async def check_data_promocode(promo_data: PromocodeCreate):
                                'для активации некоторыми пользователями.')
 
 
-
-async def get_promo_or_404(session, id: int):
+async def get_promo_or_404_by_id(session, id: int) -> Promocode:
     '''Получение промокода по его коду или возврат ошибки 404.'''
     promocode = await promocode_crud.get(session=session, obj_id=id)
     if not promocode:
         return not_found('Промокод не найден.')
     return promocode
+
+
+async def get_promo_or_404_by_code(session, code: str) -> Promocode:
+    '''Получаем объект промокода по его коду.'''
+    promocode = await promocode_crud.get_promocode_by_code(
+        session=session,
+        code=code
+    )
+    if not promocode:
+        return not_found('Промокод не найден.')
+    return promocode
+
+
+async def check_permission_promo(
+        user: User, promocode_data: Promocode) -> None:
+    '''Проверка прав для создания промокодов.'''
+    if ((promocode_data.purpose == PromocodePurpose.DISCOUNT
+         ) and (not await check_current_user_admin(user))):
+        return forbidden('У вас недостаточно прав для создания '
+                         'скидочного промокода.')

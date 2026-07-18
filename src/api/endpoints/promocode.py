@@ -8,8 +8,12 @@ from core.db import get_async_session
 from schemas.promocode import (PromocodeCreate, PromocodeShortInfo,
                                PromocodeInfo)
 from models.user import User
+from models.promocode import PromocodePurpose
 from crud.promocode import promocode_crud
-from api.validators.promocode import check_data_promocode, get_promo_or_404
+from api.validators.promocode import (check_data_promocode,
+                                      get_promo_or_404_by_id,
+                                      get_promo_or_404_by_code,
+                                      check_permission_promo)
 
 
 router = APIRouter(prefix='/promocodes', tags=['Промокоды'])
@@ -40,7 +44,7 @@ async def delete_promocode(
     promocode_id: Annotated[int, Path(title='ID промокода')]
 ):
     '''Удаление промокода для конкретного пользователя или админа.'''
-    promocode = await get_promo_or_404(session, promocode_id)
+    promocode = await get_promo_or_404_by_id(session, promocode_id)
     await promocode_crud.delete(session=session, db_obj=promocode)
     return {'message': 'Промокод успешно удален'}
 
@@ -57,6 +61,9 @@ async def create_promocode(
     obj_in: PromocodeCreate
 ) -> PromocodeShortInfo:
     '''Создание промокода.'''
+    await check_permission_promo(
+        promocode_data=obj_in,
+        user=user)
     if obj_in.code is None:
         obj_in.code = await making_promocode()
     await check_data_promocode(obj_in)
@@ -67,6 +74,7 @@ async def create_promocode(
     )
     return promocode
 
+
 @router.post(
     '/activate_promo_code/{promocode}',
     response_model=PromocodeShortInfo,
@@ -76,5 +84,10 @@ async def create_promocode(
 async def activate_promocode(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     user: Annotated[User, Depends(get_current_user)],
+    promocode: Annotated[str, Path(title='Code промокода')]
 ) -> PromocodeShortInfo:
     '''Активация промокода'''
+    promocode_obj = await get_promo_or_404_by_code(
+        session=session,
+        code=promocode)
+    
