@@ -44,5 +44,19 @@ class CRUDPromocode(CRUDBase[Promocode, PromocodeCreate, PromocodeInfo]):
         await session.refresh(promocode)
         return promocode
 
+    async def activate_gift_promo(
+        self,
+        session: AsyncSession,
+        promocode: Promocode,
+        sub_id: int
+    ) -> Promocode:
+        promocode.is_activated = True
+        promocode.used_count += 1
+        promocode.sub_id = sub_id
+        session.add(promocode)
+        await session.commit()
+        await session.refresh(promocode)
+        return promocode
+
 
 promocode_crud = CRUDPromocode(Promocode)

@@ -5,11 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.services import get_current_user, making_promocode
 from core.db import get_async_session
+from schemas.subscription import SubscriptionCreate
 from schemas.promocode import (PromocodeCreate, PromocodeShortInfo,
                                PromocodeInfo)
 from models.user import User
 from models.promocode import PromocodePurpose
 from crud.promocode import promocode_crud
+from crud.subscription import sub_crud
+from crud.panel import panel_crud
 from api.validators.promocode import (check_data_promocode,
                                       get_promo_or_404_by_id,
                                       get_promo_or_404_by_code,
@@ -90,4 +93,21 @@ async def activate_promocode(
     promocode_obj = await get_promo_or_404_by_code(
         session=session,
         code=promocode)
-    
+    if promocode_obj.purpose == PromocodePurpose.GIFT_SUBSCRIPTION:
+        sub_create_schema = SubscriptionCreate(
+            end_date_level=promocode_obj.sub_level, user_id=user.id)
+        panels = await panel_crud.get_all(session=session)
+        new_sub = await sub_crud.create_subscription(
+            obj_in=sub_create_schema,
+            panels=panels,
+            session=session
+            )
+        promocode_activated = await promocode_crud.activate_gift_promo(
+            session=session, promocode=promocode_obj, sub_id=new_sub.id)
+    if promocode_obj.purpose == PromocodePurpose.DISCOUNT:
+        promocode_activated = await promocode_crud.activate_discount_promo(
+            id=promocode_obj.id)
+    if promocode_obj.purpose == PromocodePurpose.REFERRAL:
+        promocode_activated = await promocode_crud.activate_referal_promo(
+            id=promocode_obj.id)
+    return promocode_activated

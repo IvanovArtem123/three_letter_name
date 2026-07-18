@@ -42,6 +42,7 @@ class PromocodeShortInfo(BaseModel):
     user_id: int
     code: str
     purpose: PromocodePurpose
+    sub_id: Optional[int] = None
     end_date: Optional[datetime] = None
     target_user_ids: Optional[List[int]] = []
     sub_level: Optional[Subscription_Date_Levels] = None
@@ -63,5 +64,3 @@ class PromocodeInfo(PromocodeShortInfo):
     is_active: bool
     usage_limit: int
     used_count: int
-
-    model_config = ConfigDict(from_attributes=True)
